@@ -40,27 +40,6 @@ ETHER5 network ip is 192.168.4.1 bridged
 
  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   MMM      MMM       KKK                          TTTTTTTTTTT      KKK
   MMMM    MMMM       KKK                          TTTTTTTTTTT      KKK
   MMM MMMM MMM  III  KKK  KKK  RRRRRR     OOOOOO      TTT     III  KKK  KKK
@@ -157,7 +136,7 @@ add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" 
 add action=accept chain=prerouting dst-address=192.168.1.0/24
 add action=accept chain=prerouting dst-address=192.168.2.0/24
 add action=accept chain=prerouting dst-address=192.168.4.0/24
-add action=accept chain=prerouting dst-address=192.168.6.0/24
+add action=accept chain=prerouting dst-address=192.168.5.0/24
 add action=accept chain=prerouting dst-address=192.168.3.0/24
 add action=mark-connection chain=prerouting comment=ML dst-port=\
     2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-connection-mark=\

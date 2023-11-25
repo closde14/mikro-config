@@ -38,6 +38,29 @@ ETHER5 network ip is 192.168.4.1 bridged
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   MMM      MMM       KKK                          TTTTTTTTTTT      KKK
   MMMM    MMMM       KKK                          TTTTTTTTTTT      KKK
   MMM MMMM MMM  III  KKK  KKK  RRRRRR     OOOOOO      TTT     III  KKK  KKK
@@ -52,7 +75,7 @@ Press F1 for help
 
 
 [admin@LoadBalancer] > export 
-# nov/25/2023 07:42:56 by RouterOS 7.2
+# nov/25/2023 08:05:16 by RouterOS 7.2
 # software id = CNBR-XKV7
 #
 # model = RB750Gr3
@@ -91,13 +114,9 @@ set 0 name=serial0
 add disabled=yes name=queue1 packet-mark=Gaming parent=global
 /queue type
 add kind=fq-codel name=FQCODEL
-/queue simple
-add limit-at=150M/150M max-limit=150M/150M name=HOTSPOT queue=FQCODEL/FQCODEL \
-    target=10.0.0.0/24 total-queue=FQCODEL
 /ip hotspot user profile
 set [ find default=yes ] on-logout="/queue simple\r\
-    \nremove name=\"\$user\"" parent-queue=HOTSPOT queue-type=FQCODEL rate-limit=\
-    3M/3M
+    \nremove name=\"\$user\"" queue-type=FQCODEL rate-limit=3M/3M
 /routing table
 add disabled=no fib name=ISP1
 add disabled=no fib name=ISP2
@@ -214,6 +233,7 @@ add action=masquerade chain=srcnat comment="masquerade hotspot network" \
     src-address=10.0.0.0/24
 /ip hotspot user
 add name=admin
+add name=user1
 /ip route
 add check-gateway=ping disabled=no distance=2 dst-address=0.0.0.0/0 gateway=\
     192.168.1.1 pref-src="" routing-table=ISP1 scope=30 suppress-hw-offload=no \

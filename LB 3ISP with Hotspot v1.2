@@ -244,9 +244,6 @@ add disabled=no distance=1 dst-address=1.0.0.1/32 gateway=192.168.2.1 pref-src="
     routing-table=main scope=10 suppress-hw-offload=no target-scope=10
 add disabled=no distance=1 dst-address=9.9.9.9/32 gateway=192.168.5.40 pref-src=\
     "" routing-table=main scope=10 suppress-hw-offload=no target-scope=10
-/ppp secret
-add name=3in1coffee profile=3M service=pppoe
-add name=10in1coffee profile=10M service=pppoe
 /routing rule
 add action=lookup-only-in-table disabled=no src-address=192.168.2.1/32 table=ISP2
 /system clock

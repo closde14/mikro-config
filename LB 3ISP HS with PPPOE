@@ -1,0 +1,59 @@
+SOON. 
+
+TO BE POSTED NOV 30 2023
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pls Donate: GCASH 09071973112 (Fr***** A.) BADLY NEEDED KO PANG KAPE AT pang bili OLT 
+
+Wag nyo po ibenta ang script ko. Ma-agang pamasko po, at caroling ko na din po sainyo. MARAMING SALAMAT SA LAHAT NG MEMBERS NG GROUP< ADMIN< MODS AT MGA SHARER. 
+
+DISCLAIMER: May mga pupuna po sa config ko, yun mas may alam at expert, Sensya na master.. Ito po para sa mga gusto matuto, nag sisimula pa lang. Sharing is caring. KUNG MAY MALI PO SA SETUP KO, WAG NYO PO I POST at ibash ako. PM ME PARA MA AYUS KO. LASTLY, sa mga gagamit, i custom nyo n lang depende sa set up nyo. 
++++++++++++++++++++++++++++++++++++++++++++++++++
+
+***ADDED PPPOE
+***PPPOE CLIENT with dynamic simple q and fqcodel
+*** tested A+ rating sa bufferbloat both HOTSPOT and PPPOE Clients.
+
+
+DISCRIPTION:
+ETHER1	ISP1 = high bandwidth, no CGNAT, but slightly high ping (PLDT)
+ETHER2	ISP2 = CGNAT residendial, but low ping, 10ms (converge)
+ETHER3	ISP3 = Any ISP can either be simbased or dsl or fibre whatever
+ETHER4  LAN1 = HOTSPOT & PPPOE
+ETHER5	LAN2 = NETWORK 
+
+HOTSPOT	:3M/3M DL AND UP Dynamic simple Q(fast remove sa SimpleQ) with fqCOdel 
+PPPOE	:2 sample client profile (3Mbps and 10Mbps), copy edit para mag dag dag ng profiles
+	:dynamic simple Q sa PPPOE(fast removal sa simple Q upon client disconnection)	
+	:tested A+ sa bufferbloat
+
+LOADBALANCE:All indicated game ports will go to ISP2 para sa mababang ping. HOWEVER!!!! lahat ng browsing, video streaming at other connections ay pupunta sa Loadbalancing all ISP1,2,3. MAg tutulong tulong ang 3 ISP na sa other connection with. naka set ang ISP1 sa 4/0 at 4/1, samantalang ang isp 2 at isp3 ay naka set sa 4/2 at 4/3 respectively.
+
+FAILOVER: 
+naka set sa DNS recursive routing ang lahat ng ISP kaya wala ng ibang gagalawin
+naka set na mag failover and ISP2(GAMES) papunta sa isp1 at isp3 incase na mag down ang ISP2. 
+lahat ay automatic
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+REQUIREMENTS:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+ROS 7
+
+SET ISP1 modem to ether1 with IP 192.168.1.1 
+SET ISP2 modem to ether2 with IP 192.168.2.1
+SET ISP3 modem to ether3 with IP 192.168.5.1
+
+Ether4 Network IP IS 10.0.0.1 (Hotspot) and 10.10.0.1 (pppoe) bridged 
+ETHER5 network ip is 192.168.4.1 bridged

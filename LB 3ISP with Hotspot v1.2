@@ -39,7 +39,6 @@ ETHER5 network ip is 192.168.4.1 bridged
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
  
-
   MMM      MMM       KKK                          TTTTTTTTTTT      KKK
   MMMM    MMMM       KKK                          TTTTTTTTTTT      KKK
   MMM MMMM MMM  III  KKK  KKK  RRRRRR     OOOOOO      TTT     III  KKK  KKK
@@ -54,7 +53,7 @@ Press F1 for help
 
 
 [admin@LoadBalancer] > export 
-# nov/25/2023 08:05:16 by RouterOS 7.2
+# nov/25/2023 11:05:22 by RouterOS 7.2
 # software id = CNBR-XKV7
 #
 # model = RB750Gr3
@@ -96,6 +95,15 @@ add kind=fq-codel name=FQCODEL
 /ip hotspot user profile
 set [ find default=yes ] on-logout="/queue simple\r\
     \nremove name=\"\$user\"" queue-type=FQCODEL rate-limit=3M/3M
+/ppp profile
+add dns-server=8.8.8.8,1.1.1.1 local-address=10.10.0.1 name=3M on-down=\
+    "/queue simple\r\
+    \nremove name=\"\$user\"" queue-type=FQCODEL rate-limit=3M/3M remote-address=\
+    PPP use-ipv6=no
+add dns-server=8.8.8.8,1.1.1.1 local-address=10.10.0.1 name=10M on-down=\
+    "/queue simple\r\
+    \nremove name=\"\$user\"" queue-type=FQCODEL rate-limit=10M/10M \
+    remote-address=PPP use-ipv6=no
 /routing table
 add disabled=no fib name=ISP1
 add disabled=no fib name=ISP2
@@ -112,6 +120,9 @@ add interface=ether2_Converge list=WAN
 add interface=ether3_ISP3 list=WAN
 add list=WG
 add interface=PPPOE_HOTSPOT list=LAN
+/interface pppoe-server server
+add authentication=pap disabled=no interface=PPPOE_HOTSPOT one-session-per-host=\
+    yes service-name=PPPOE
 /ip address
 add address=192.168.4.1/24 interface=BRIDGE_4.1_ether5 network=192.168.4.0
 add address=10.0.0.1/24 interface=PPPOE_HOTSPOT network=10.0.0.0
@@ -127,8 +138,9 @@ add address=192.168.4.0/24 dns-server=8.8.8.8 gateway=192.168.4.1 netmask=24
 /ip dns
 set allow-remote-requests=yes servers=8.8.4.4,8.8.8.8
 /ip firewall address-list
-add address=192.168.3.2-192.168.3.254 list=LAN
+add address=10.0.0.2-10.0.0.254 list=LAN
 add address=192.168.4.2-192.168.4.254 list=LAN
+add address=10.10.0.2-10.10.0.254 list=LAN
 /ip firewall filter
 add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" \
     disabled=yes
@@ -246,6 +258,9 @@ add disabled=no distance=1 dst-address=1.0.0.1/32 gateway=192.168.2.1 pref-src="
     routing-table=main scope=10 suppress-hw-offload=no target-scope=10
 add disabled=no distance=1 dst-address=9.9.9.9/32 gateway=192.168.5.40 pref-src=\
     "" routing-table=main scope=10 suppress-hw-offload=no target-scope=10
+/ppp secret
+add name=3in1coffee profile=3M service=pppoe
+add name=10in1coffee profile=10M service=pppoe
 /routing rule
 add action=lookup-only-in-table disabled=no src-address=192.168.2.1/32 table=ISP2
 /system clock

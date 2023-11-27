@@ -1,0 +1,300 @@
+
+/interface bridge
+add name=Bridge
+
+/interface ethernet
+set [ find default-name=ether1 ] name=ISP1
+set [ find default-name=ether2 ] name=ISP2
+
+/interface list
+add name=WAN
+add name=LAN
+
+/interface lte apn
+set [ find default=yes ] ip-type=ipv4 use-network-apn=no
+
+/ip hotspot profile
+set [ find default=yes ] login-by=mac,http-chap,https,http-pap name=Hotspot
+add dns-name=our-hotspot.net hotspot-address=10.0.0.1 html-directory=flash/hotspot login-by=http-chap,http-pap name=hsprof1
+
+/ip pool
+add name=hs-pool-6 ranges=10.0.0.10-10.0.0.200
+add name=Non-payment ranges=30.0.0.5-30.0.0.254
+add name=P6 ranges=192.168.88.226-192.168.88.250
+add name=p7 ranges=192.168.88.251-192.168.88.254
+
+/ip dhcp-server
+add address-pool=hs-pool-6 interface=Bridge lease-time=1h name=dhcp1
+
+/ip hotspot
+add address-pool=hs-pool-6 disabled=no interface=Bridge name=hotspot1 profile=hsprof1
+
+/ip pool
+add name=P5 next-pool=P6 ranges=192.168.88.201-192.168.88.225
+add name=P4 next-pool=P5 ranges=192.168.88.176-192.168.88.200
+add name=P3 next-pool=P4 ranges=192.168.88.151-192.168.88.175
+add name=P2 next-pool=P3 ranges=192.168.88.126-192.168.88.150
+add name=P1 next-pool=P2 ranges=192.168.88.101-192.168.88.125
+
+/ppp profile
+add dns-server=8.8.8.8,1.1.1.1 local-address=192.168.88.1 name=6M_450 on-down="/queue simple\r\
+    \nremove [find name=\$user]" on-up=\
+    "/queue simple\r\
+    \nadd limit-at=6M/6M max-limit=6M/6M name=\$user parent=TOTAL priority=5/5 queue=FQ_CODEL/FQ_CODEL target=\\\r\
+    \n    \$\"remote-address\" \r\
+    \n" only-one=yes remote-address=P3 use-ipv6=no
+add dns-server=8.8.8.8,1.1.1.1 local-address=192.168.88.1 name=15M_900 on-down="/queue simple\r\
+    \nremove [find name=\$user]" on-up=\
+    "/queue simple\r\
+    \nadd limit-at=15M/15M max-limit=15M/15M name=\$user parent=TOTAL priority=5/5 queue=FQ_CODEL/FQ_CODEL target=\\\r\
+    \n    \$\"remote-address\" \r\
+    \n" only-one=yes remote-address=P4 use-ipv6=no
+add address-list=non-payment local-address=30.0.0.1 name=NON_payment on-down="/queue simple remove [find name=\$user]" only-one=yes rate-limit=1k/1k remote-address=Non-payment
+add dns-server=8.8.8.8,1.1.1.1 local-address=192.168.88.1 name=3M_150 on-down="/queue simple\r\
+    \nremove [find name=\$user]" on-up="/queue simple\r\
+    \nadd limit-at=3M/3M max-limit=3M/3M name=\$user parent=TOTAL target=\$\"remote-address\" priority=6/6 queue=FQ_CODEL/FQ_CODEL \r\
+    \n" only-one=yes remote-address=P1 use-ipv6=no
+add dns-server=8.8.8.8 local-address=192.168.88.1 name=25M_900 on-down="/queue simple\r\
+    \nremove [find name=\$user]" on-up=\
+    "/queue simple\r\
+    \nadd limit-at=25M/25M max-limit=25M/25M name=\$user parent=TOTAL priority=4/4 queue=FQ_CODEL/FQ_CODEL target=\\\r\
+    \n    \$\"remote-address\" " only-one=yes remote-address=P5 use-ipv6=no wins-server=1.1.1.1
+add dns-server=8.8.8.8,1.1.1.1 local-address=192.168.88.1 name=80M on-down="/queue simple\r\
+    \nremove [find name=\$user]" on-up=\
+    "/queue simple\r\
+    \nadd limit-at=160M/160M max-limit=160M/160M name=\$user parent=TOTAL priority=1/1 queue=FQ_CODEL/FQ_CODEL target=\\\r\
+    \n    \$\"remote-address\" " only-one=yes remote-address=P6 use-ipv6=no
+add dns-server=8.8.8.8 local-address=192.168.88.1 name=test on-up="\
+    \n" only-one=yes rate-limit=20M/20M remote-address=p7 use-ipv6=no
+add dns-server=8.8.8.8,1.1.1.1 local-address=192.168.88.1 name=4M_300 on-down="/queue simple\r\
+    \nremove [find name=\$user]" on-up=\
+    "/queue simple\r\
+    \nadd limit-at=4M/4M max-limit=4M/4M name=\$user parent=TOTAL priority=5/5 queue=FQ_CODEL/FQ_CODEL target=\\\r\
+    \n    \$\"remote-address\" \r\
+    \n" only-one=yes remote-address=P2 use-ipv6=no
+
+/queue simple
+add name=TOTAL target=192.168.88.0/24
+
+/queue type
+add kind=fq-codel name=FQ_CODEL
+
+/ip hotspot user profile
+set [ find default=yes ] keepalive-timeout=1h name=3M on-login="{\r\
+    \n:if ( [ /ip hotspot user get \$user comment ] != \"\" ) do={\r\
+    \n:local datex [/ip hotspot user get \$user comment ]\r\
+    \n:local pecah [:toarray [:pick \$datex ([:find \$datex \":\"]+1) [:len \$datex]]]\r\
+    \n:local tgl [:pick \$pecah 1]\r\
+    \n:if ([:len \$tgl] != 0) do={\r\
+    \n:local komen [:pick \$datex 0 [:find \$datex \":\"]]\r\
+    \n:local harga [:pick \$pecah 0]\r\
+    \n:local date [ /system clock get date ]\r\
+    \n:local days \$tgl\r\
+    \n:local mdays  {31;28;31;30;31;30;31;31;30;31;30;31}\r\
+    \n:local months {\"jan\"=1;\"feb\"=2;\"mar\"=3;\"apr\"=4;\"may\"=5;\"jun\"=6;\"jul\"=7;\"aug\"=8;\"sep\"=9;\"oct\"=10;\"nov\"=11;\"dec\"=12}\r\
+    \n:local monthr  {\"jan\";\"feb\";\"mar\";\"apr\";\"may\";\"jun\";\"jul\";\"aug\";\"sep\";\"oct\";\"nov\";\"dec\"}\r\
+    \n:local dd  [:tonum [:pick \$date 4 6]]\r\
+    \n:local yy [:tonum [:pick \$date 7 11]]\r\
+    \n:local month [:pick \$date 0 3]\r\
+    \n:local mm (:\$months->\$month)\r\
+    \n:set dd (\$dd+\$days)\r\
+    \n:local dm [:pick \$mdays (\$mm-1)]\r\
+    \n:if (\$mm=2 && ((\$yy&3=0 && (\$yy/100*100 != \$yy)) || \$yy/400*400=\$yy) ) do={ :set dm 29 }\r\
+    \n:while (\$dd>\$dm) do={\r\
+    \n:set dd (\$dd-\$dm)\r\
+    \n:set mm (\$mm+1)\r\
+    \n:if (\$mm>12) do={\r\
+    \n:set mm 1\r\
+    \n:set yy (\$yy+1)\r\
+    \n}\r\
+    \n:set dm [:pick \$mdays (\$mm-1)]\r\
+    \n:if (\$mm=2 &&  ((\$yy&3=0 && (\$yy/100*100 != \$yy)) || \$yy/400*400=\$yy) ) do={ :set dm 29 }\r\
+    \n};\r\
+    \n:local res \"\$[:pick \$monthr (\$mm-1)]/\"\r\
+    \n:if (\$dd<10) do={ :set res (\$res.\"0\") }\r\
+    \n:set \$res \"\$res\$dd/\$yy\"\r\
+    \n:local waktu [/system clock get time]\r\
+    \n[ /ip hotspot user set \$user comment=\"\$komen: \\\"\$harga\\\" \$res - \$waktu\" ]\r\
+    \n}\r\
+    \n}\r\
+    \n}" on-logout="/queue simple\r\
+    \nremove [find name=\$user]" queue-type=FQ_CODEL rate-limit=3M/3M shared-users=unlimited
+add !idle-timeout keepalive-timeout=1h name=10M on-login="{\r\
+    \n:if ( [ /ip hotspot user get \$user comment ] != \"\" ) do={\r\
+    \n:local datex [/ip hotspot user get \$user comment ]\r\
+    \n:local pecah [:toarray [:pick \$datex ([:find \$datex \":\"]+1) [:len \$datex]]]\r\
+    \n:local tgl [:pick \$pecah 1]\r\
+    \n:if ([:len \$tgl] != 0) do={\r\
+    \n:local komen [:pick \$datex 0 [:find \$datex \":\"]]\r\
+    \n:local harga [:pick \$pecah 0]\r\
+    \n:local date [ /system clock get date ]\r\
+    \n:local days \$tgl\r\
+    \n:local mdays  {31;28;31;30;31;30;31;31;30;31;30;31}\r\
+    \n:local months {\"jan\"=1;\"feb\"=2;\"mar\"=3;\"apr\"=4;\"may\"=5;\"jun\"=6;\"jul\"=7;\"aug\"=8;\"sep\"=9;\"oct\"=10;\"nov\"=11;\"dec\"=12}\r\
+    \n:local monthr  {\"jan\";\"feb\";\"mar\";\"apr\";\"may\";\"jun\";\"jul\";\"aug\";\"sep\";\"oct\";\"nov\";\"dec\"}\r\
+    \n:local dd  [:tonum [:pick \$date 4 6]]\r\
+    \n:local yy [:tonum [:pick \$date 7 11]]\r\
+    \n:local month [:pick \$date 0 3]\r\
+    \n:local mm (:\$months->\$month)\r\
+    \n:set dd (\$dd+\$days)\r\
+    \n:local dm [:pick \$mdays (\$mm-1)]\r\
+    \n:if (\$mm=2 && ((\$yy&3=0 && (\$yy/100*100 != \$yy)) || \$yy/400*400=\$yy) ) do={ :set dm 29 }\r\
+    \n:while (\$dd>\$dm) do={\r\
+    \n:set dd (\$dd-\$dm)\r\
+    \n:set mm (\$mm+1)\r\
+    \n:if (\$mm>12) do={\r\
+    \n:set mm 1\r\
+    \n:set yy (\$yy+1)\r\
+    \n}\r\
+    \n:set dm [:pick \$mdays (\$mm-1)]\r\
+    \n:if (\$mm=2 &&  ((\$yy&3=0 && (\$yy/100*100 != \$yy)) || \$yy/400*400=\$yy) ) do={ :set dm 29 }\r\
+    \n};\r\
+    \n:local res \"\$[:pick \$monthr (\$mm-1)]/\"\r\
+    \n:if (\$dd<10) do={ :set res (\$res.\"0\") }\r\
+    \n:set \$res \"\$res\$dd/\$yy\"\r\
+    \n:local waktu [/system clock get time]\r\
+    \n[ /ip hotspot user set \$user comment=\"\$komen: \\\"\$harga\\\" \$res - \$waktu\" ]\r\
+    \n}\r\
+    \n}\r\
+    \n}" on-logout="/queue simple\r\
+    \nremove [find name=\$user]" queue-type=FQ_CODEL rate-limit=10M/10M shared-users=unlimited
+
+/ppp profile
+add dns-server=8.8.8.8 local-address=192.168.88.1 name=Hi only-one=yes queue-type=FQ_CODEL rate-limit=20M/20M remote-address=P6
+
+/routing table
+add fib name=gaming
+add disabled=no fib name=to_ISP2
+add fib name=browsings
+add disabled=no fib name=to_ISP1
+
+/interface bridge port
+add bridge=Bridge ingress-filtering=no interface=ether4
+add bridge=Bridge ingress-filtering=no interface=ether5
+
+/ip neighbor discovery-settings
+set discover-interface-list=all
+
+/interface list member
+add interface=ISP1 list=WAN
+add interface=ISP2 list=WAN
+add interface=ether5 list=LAN
+add interface=ether4 list=LAN
+add interface=ether3 list=LAN
+
+/interface pppoe-server server
+add authentication=pap disabled=no interface=Bridge one-session-per-host=yes service-name=PPPOE
+
+/ip address
+add address=192.168.88.1/24 comment=PPPOE interface=Bridge network=192.168.88.0
+add address=10.0.0.1/24 comment="hotspot network" interface=Bridge network=10.0.0.0
+
+/ip dhcp-client
+add interface=ether3 use-peer-ntp=no
+add add-default-route=no interface=ISP1 use-peer-ntp=no
+add add-default-route=no interface=ISP2 use-peer-ntp=no
+
+/ip dhcp-server alert
+add disabled=no interface=ether4 valid-server=DC:2C:6E:74:CB:AB
+add disabled=no interface=ether5 valid-server=DC:2C:6E:74:CB:AC
+
+/ip dhcp-server network
+add address=10.0.0.0/24 comment="hotspot network" gateway=10.0.0.1
+
+/ip dns
+set allow-remote-requests=yes servers=8.8.8.8,8.8.4.4,1.1.1.1
+
+/ip firewall address-list
+add address=192.168.7.0/24 list=ISP1
+add address=192.168.88.1 list=LAN
+add address=10.0.0.0/24 list=Hotspot
+add address=192.168.3.0/24 list=ISP2
+
+/ip firewall filter
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" disabled=yes
+add action=accept chain=output comment=ISP dst-address=192.168.1.1 out-interface=ISP1
+add action=drop chain=output dst-address=192.168.1.1
+add action=accept chain=output dst-address=192.168.4.1 out-interface=ISP2
+add action=drop chain=output dst-address=192.168.4.1
+add action=accept chain=output dst-address=192.168.3.1 out-interface=ether3
+add action=drop chain=output dst-address=192.168.3.1
+
+/ip firewall mangle
+add action=accept chain=prerouting in-interface=ISP1
+add action=accept chain=prerouting in-interface=ISP2
+add action=accept chain=prerouting in-interface=ether3
+add action=accept chain=prerouting in-interface=Bridge
+add action=mark-routing chain=prerouting comment="Browsing traffic" dst-port=443 new-routing-mark=browsings passthrough=no protocol=tcp
+add action=mark-routing chain=prerouting dst-port=443 new-routing-mark=browsings passthrough=no protocol=udp
+add action=mark-routing chain=prerouting comment="Gaming Traffic" new-routing-mark=gaming passthrough=yes protocol=tcp
+add action=mark-routing chain=prerouting new-routing-mark=gaming passthrough=yes protocol=udp
+
+/ip firewall nat
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" disabled=yes
+add action=masquerade chain=srcnat comment="masquerade hotspot network" src-address=10.0.0.0/24
+add action=masquerade chain=srcnat out-interface=ISP1
+add action=masquerade chain=srcnat out-interface=ISP2
+add action=masquerade chain=srcnat out-interface=ether3
+
+/ip firewall raw
+add action=log chain=prerouting dst-port=123 log=yes log-prefix="NTP request" protocol=udp
+
+/ip hotspot user
+add name=admin profile=10M
+add comment="30d : \"150\" oct/09/2023 - 09:10:07" limit-uptime=4w2d name=HS6450 server=hotspot1
+add comment="30d : \"150\" 30" limit-uptime=4w2d name=HS9412 server=hotspot1
+add comment="30d : \"150\" 30" limit-uptime=4w2d name=HS4921 server=hotspot1
+add comment="30d : \"150\" 30" limit-uptime=4w2d name=HS1904 server=hotspot1
+add comment="30d : \"150\" 30" limit-uptime=4w2d name=HS1885 server=hotspot1
+add comment="30d : \"150\" 30" limit-uptime=4w2d name=HS7582 server=hotspot1
+add comment="30d : \"150\" 30" limit-uptime=4w2d name=HS9346 server=hotspot1
+add comment="30d : \"150\" 30" limit-uptime=4w2d name=HS1258 server=hotspot1
+add comment="30d : \"150\" 30" limit-uptime=4w2d name=HS1991 server=hotspot1
+add comment="30d : \"150\" oct/09/2023 - 09:27:19" limit-uptime=4w2d name=Judz server=hotspot1
+
+/ip route
+add comment=Gaming1 disabled=no distance=22 dst-address=0.0.0.0/0 gateway=192.168.7.1 pref-src="" routing-table=gaming scope=30 suppress-hw-offload=no target-scope=10
+add comment=Gaming3 disabled=no distance=20 dst-address=0.0.0.0/0 gateway=192.168.3.2 pref-src="" routing-table=gaming scope=30 suppress-hw-offload=no target-scope=10
+add comment=Browsing2 disabled=no distance=11 dst-address=0.0.0.0/0 gateway=192.168.3.1 pref-src="" routing-table=browsings scope=30 suppress-hw-offload=no target-scope=10
+add comment=Browsing1 disabled=no distance=10 dst-address=0.0.0.0/0 gateway=192.168.7.1 pref-src="" routing-table=browsings scope=30 suppress-hw-offload=no target-scope=10
+add comment=PING1 disabled=no distance=1 dst-address=8.8.4.4/32 gateway=192.168.7.1%ISP1 pref-src="" routing-table=main scope=10 suppress-hw-offload=no target-scope=10
+add comment=PING2 disabled=no distance=1 dst-address=8.8.8.8/32 gateway=192.168.3.1%ISP2 pref-src="" routing-table=main scope=10 suppress-hw-offload=no target-scope=10
+add disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.3.1 pref-src="" routing-table=to_ISP2 scope=30 suppress-hw-offload=no target-scope=10
+add disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.7.1 pref-src="" routing-table=to_ISP1 scope=30 suppress-hw-offload=no target-scope=10
+add disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.7.1 pref-src="" routing-table=main scope=30 suppress-hw-offload=no target-scope=10
+add disabled=no distance=2 dst-address=0.0.0.0/0 gateway=192.168.3.1 pref-src="" routing-table=main scope=30 suppress-hw-offload=no target-scope=10
+
+/system clock
+set time-zone-name=Asia/Manila
+/system identity
+set name=PPPOE_server
+/system ntp client
+set enabled=yes
+/system ntp client servers
+add address=time1.google.com
+/system package update
+set channel=development
+
+/tool netwatch
+add comment=ISP1 down-script="ip route/disable [find comment=Browsing1]\r\
+    \n\
+    \nip route/disable [find comment=Gaming1]\
+    \n\
+    \n\r\
+    \nip route/disable [find comment=ISP1]\r\
+    \n\
+    \n" host=8.8.4.4 interval=8s up-script="ip route/enable [find comment=Browsing1]\
+    \n\r\
+    \nip route/enable [find comment=Gaming1]\r\
+    \n\
+    \nip route/enable [find comment=ISP1]\r\
+    \n\
+    \n"
+add comment=ISP2 down-script="ip route/disable [find comment=ISP2]\r\
+    \nip route/disable [find comment=Browsing2]\r\
+    \nip route/disable [find comment=Gaming2]" host=1.1.1.1 interval=8s timeout=1s800ms up-script=\
+    "ip route/enable [find comment=ISP2]\r\
+    \nip route/enable [find comment=Browsing2]\r\
+    \nip route/enable [find comment=Gaming2]"
+
+

@@ -1,0 +1,70 @@
+/interface bridge
+add name=LAN
+/interface wireless
+set [ find default-name=wlan1 ] mode=ap-bridge ssid=MikroTik wireless-protocol=\
+    802.11
+/interface ethernet
+set [ find default-name=ether1 ] name=ether1_ISP1
+set [ find default-name=ether2 ] name=ether2_ISP2
+/interface list
+add name=WAN
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip pool
+add name=dhcp_pool2 ranges=192.168.4.2-192.168.4.254
+/ip dhcp-server
+add address-pool=dhcp_pool2 disabled=no interface=LAN name=dhcp1
+/queue simple
+add max-limit=40M/40M name=queue1 target=ether2_ISP2
+/interface bridge port
+add bridge=LAN interface=wlan1
+add bridge=LAN interface=ether4
+/interface list member
+add interface=ether1_ISP1 list=WAN
+add interface=LAN
+/ip address
+add address=192.168.4.1/24 interface=LAN network=192.168.4.0
+/ip dhcp-client
+add add-default-route=no disabled=no interface=ether2_ISP2 use-peer-dns=no \
+    use-peer-ntp=no
+add add-default-route=no disabled=no interface=ether1_ISP1 use-peer-dns=no \
+    use-peer-ntp=no
+/ip dhcp-server network
+add address=0.0.0.0/24 gateway=0.0.0.0 netmask=24
+add address=192.168.4.0/24 gateway=192.168.4.1
+add address=192.168.77.0/24 gateway=192.168.77.1
+/ip dns
+set servers=1.1.1.1,8.8.8.8
+/ip firewall mangle
+add action=accept chain=prerouting comment=Accept dst-address=192.168.3.0/24
+add action=accept chain=prerouting dst-address=192.168.4.0/24
+add action=accept chain=prerouting dst-address=192.168.5.0/24
+add action=mark-connection chain=input comment=Input in-interface=ether1_ISP1 \
+    new-connection-mark=ISP1 passthrough=yes
+add action=mark-connection chain=input in-interface=ether2_ISP2 \
+    new-connection-mark=ISP2 passthrough=yes
+add action=mark-connection chain=prerouting comment=Prerouting in-interface=\
+    ether1_ISP1 new-connection-mark=ISP1 passthrough=yes
+add action=mark-connection chain=prerouting in-interface=ether2_ISP2 \
+    new-connection-mark=ISP2 passthrough=yes
+add action=mark-connection chain=prerouting comment=PCC dst-address-type=!local \
+    in-interface=LAN new-connection-mark=ISP1 passthrough=yes \
+    per-connection-classifier=both-addresses:2/0
+add action=mark-connection chain=prerouting dst-address-type=!local \
+    in-interface=LAN new-connection-mark=ISP2 passthrough=yes \
+    per-connection-classifier=both-addresses:2/1
+add action=mark-routing chain=output comment=Output connection-mark=ISP1 \
+    new-routing-mark=to_ISP1 passthrough=yes
+add action=mark-routing chain=output connection-mark=ISP2 new-routing-mark=\
+    to_ISP2 passthrough=yes
+add action=mark-routing chain=prerouting comment="Mark route" connection-mark=\
+    ISP1 in-interface=LAN new-routing-mark=to_ISP1 passthrough=yes
+add action=mark-routing chain=prerouting connection-mark=ISP2 in-interface=LAN \
+    new-routing-mark=to_ISP2 passthrough=yes
+/ip firewall nat
+add action=masquerade chain=srcnat out-interface=ether1_ISP1
+add action=masquerade chain=srcnat out-interface=ether2_ISP2
+/ip route
+add disabled=yes distance=1 gateway=192.168.5.40 routing-mark=to_ISP1
+add disabled=yes distance=1 gateway=192.168.3.1 routing-mark=to_ISP2
+add distance=1 gateway=192.168.5.40,192.168.3.1

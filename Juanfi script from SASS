@@ -1,0 +1,392 @@
+Disclaimer:
+This is a free script found from one of the youtubers
+THIS IS NOT MINE. 
+
+REQUIREMENTS
+
+ROS 6.48
+HAPLITE
+
+
+Description:
+
+JUANFI 
+
+
+
+
+  MMM      MMM       KKK                          TTTTTTTTTTT      KKK
+  MMMM    MMMM       KKK                          TTTTTTTTTTT      KKK
+  MMM MMMM MMM  III  KKK  KKK  RRRRRR     OOOOOO      TTT     III  KKK  KKK
+  MMM  MM  MMM  III  KKKKK     RRR  RRR  OOO  OOO     TTT     III  KKKKK
+  MMM      MMM  III  KKK KKK   RRRRRR    OOO  OOO     TTT     III  KKK KKK
+  MMM      MMM  III  KKK  KKK  RRR  RRR   OOOOOO      TTT     III  KKK  KKK
+
+  MikroTik RouterOS 6.48.7 (c) 1999-2023       http://www.mikrotik.com/
+
+[?]             Gives the list of available commands
+command [?]     Gives help on the command and list of arguments
+
+[Tab]           Completes the command/word. If the input is ambiguous,
+                a second [Tab] gives possible options
+
+/               Move up to base level
+..              Move up one level
+/command        Use command at the base level
+[admin@PISOWIFI_BRGY_HALL] > export
+# nov/27/2023 09:05:00 by RouterOS 6.48.7
+# software id = CHKA-Q94I
+#
+# model = RB941-2nD
+# serial number = D1190B2D8C4A
+/interface bridge
+add name=bridge.HS
+add name=bridge_LAN
+/interface wireless
+set [ find default-name=wlan1 ] band=2ghz-b/g/n channel-width=20/40mhz-eC \
+    country=philippines disabled=no frequency=auto mode=ap-bridge name=wlan2 \
+    ssid=OUR_PISOWIFI
+/interface ethernet
+set [ find default-name=ether1 ] mac-address=78:9A:18:2F:88:3A name=ether1.ISP
+set [ find default-name=ether2 ] mac-address=78:9A:18:2F:88:3B name=ether2.HS
+set [ find default-name=ether3 ] mac-address=78:9A:18:2F:88:3C name=ether3.HS
+set [ find default-name=ether4 ] mac-address=78:9A:18:2F:88:3D name=ether4.LAN
+/interface pwr-line
+set [ find default-name=pwr-line1 ] mac-address=78:9A:18:2F:88:3E
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip hotspot profile
+set [ find default=yes ] login-by=http-chap,http-pap,mac-cookie
+add hotspot-address=10.0.0.1 login-by=http-chap,http-pap name="(HS PROFILE)"
+/ip pool
+add name=pool.hs ranges=10.0.0.2-10.0.0.254
+add name=pool.lan ranges=192.168.12.2-192.168.12.254
+/ip dhcp-server
+add address-pool=pool.hs disabled=no interface=bridge.HS name=dhcp1
+add address-pool=pool.lan disabled=no interface=bridge_LAN name=dhcp2
+/ip hotspot
+add address-pool=pool.hs addresses-per-mac=1 disabled=no idle-timeout=10m \
+    interface=bridge.HS keepalive-timeout=2m name="HS SERVER" profile=\
+    "(HS PROFILE)"
+/ip hotspot user profile
+set [ find default=yes ] address-pool=pool.hs keepalive-timeout=10m \
+    mac-cookie-timeout=30m on-login="### enable telegram notification, change fr\
+    om 0 to 1 if you want to enable telegram\r\
+    \n:local enableTelegram 0;\r\
+    \n###replace telegram token\r\
+    \n:local telegramToken \"2021159313:AAHEBoOLogYjLCpSwVeKPVmKKO4TIxa02vQ\";\r\
+    \n###replace telegram chat id / group id\r\
+    \n:local chatId \"----\";\r\
+    \n\r\
+    \n### enable JuanFi online monitoring 0 = DoNotSend,  1=send data to api\r\
+    \n:local apiSend 0;\r\
+    \n### derive from the JuanFi online monitoring, create account in genman.pro\
+    jectdorsu.com\r\
+    \n:local URLvendoID 5; \r\
+    \n\r\
+    \n### enable Random MAC synchronizer\r\
+    \n:local enableRandomMacSyncFix 1;\r\
+    \n### hotspot folder for HEX put flash/hotspot for haplite put hotspot only\
+    \r\
+    \n:local hotspotFolder \"hotspot\";\r\
+    \n\r\
+    \n\r\
+    \n:local com [/ip hotspot user get [find name=\$user] comment];\r\
+    \n/ip hotspot user set comment=\"\" \$user;\r\
+    \n\r\
+    \n:if (\$com!=\"\") do={\r\
+    \n\r\
+    \n\t:local mac \$\"mac-address\";\r\
+    \n\t:local macNoCol;\r\
+    \n\t:for i from=0 to=([:len \$mac] - 1) do={ \r\
+    \n\t  :local char [:pick \$mac \$i]\r\
+    \n\t  :if (\$char = \":\") do={\r\
+    \n\t\t:set \$char \"\"\r\
+    \n\t  }\r\
+    \n\t  :set macNoCol (\$macNoCol . \$char)\r\
+    \n\t}\r\
+    \n\t\r\
+    \n\t:local validity [:pick \$com 0 [:find \$com \",\"]];\r\
+    \n\t\r\
+    \n\t:if ( \$validity!=\"0m\" ) do={\r\
+    \n\t\t:local sc [/sys scheduler find name=\$user]; :if (\$sc=\"\") do={ :loc\
+    al a [/ip hotspot user get [find name=\$user] limit-uptime]; :local c (\$val\
+    idity); :local date [ /system clock get date]; /sys sch add name=\"\$user\" \
+    disable=no start-date=\$date interval=\$c on-event=\"/ip hotspot user remove\
+    \_[find name=\$user]; /ip hotspot active remove [find user=\$user]; /ip hots\
+    pot cookie remove [find user=\$user]; /system sche remove [find name=\$user]\
+    ; /file remove \\\"\$hotspotFolder/data/\$macNoCol.txt\\\";\" policy=ftp,reb\
+    oot,read,write,policy,test,password,sniff,sensitive,romon; :delay 2s; } else\
+    ={ :local sint [/sys scheduler get \$user interval]; :if ( \$validity!=\"\" \
+    ) do={ /sys scheduler set \$user interval (\$sint+\$validity); } };\r\
+    \n\t}\r\
+    \n\t\r\
+    \n\t:local infoArray [:toarray [:pick \$com ([:find \$com \",\"]+1) [:len \$\
+    com]]];\r\
+    \n\t\r\
+    \n\t:local totaltime [/ip hotspot user get [find name=\"\$user\"] limit-upti\
+    me];\r\
+    \n\t:local amt [:pick \$infoArray 0];\r\
+    \n\t:local ext [:pick \$infoArray 1];\r\
+    \n\t:local vendo [:pick \$infoArray 2];\r\
+    \n\t:local uactive [/ip hotspot active print count-only];\r\
+    \n\t\r\
+    \n\t    #api tracking\r\
+    \n\r\
+    \n\t    #BOF\r\
+    \n\t    { /do {    \r\
+    \n\t    :local URLamount \"\$amt\";\r\
+    \n\t    :local URLcomment \"ScriptOnLoginFINAL\";\r\
+    \n\t    :local URLip [:put [:tostr \$address]];\r\
+    \n\t    :local URLusr [\$user];\r\
+    \n\t    :local URLmac [\$\"mac-address\"];\r\
+    \n\t    :local URLipmac \"\$URLusr_\$URLip_\$URLmac\";\r\
+    \n\t    :local URLactive [/ip hotspot active print count-only];\r\
+    \n\r\
+    \n\t    #fixed declaration \r\
+    \n\t    :if (\$apiSend!=0)  do={\r\
+    \n\t    /do {\r\
+    \n\t    :local fixUrl [(\"https://juanfiapi.projectdorsu.com/serve.js\\\?s=s\
+    tats&i=OE-IBX-12345&m=direct&payload=\$URLvendoID\")];\r\
+    \n\t    :local apiUrl \"\$fixUrl_\$URLamount_\$URLipmac_\$URLactive_\$URLcom\
+    ment\";\r\
+    \n\t    :log debug \"API SendInfo: \$apiUrl \";\r\
+    \n\t    /tool fetch mode=https http-method=get url=\$apiUrl keep-result=no\r\
+    \n\t    :delay 1s;\r\
+    \n\t    } on-error={:log error \"API Vendo ERROR: \$apiUrl \";} }\r\
+    \n\t    } on-error={:log error \"APIvendoRoutineError\";} }\r\
+    \n\t    #EOF\r\
+    \n\r\
+    \n\t    #end of api tracking\r\
+    \n\t\r\
+    \n\t\r\
+    \n\t:local getIncome [:put ([/system script get [find name=todayincome] sour\
+    ce])];\r\
+    \n\t/system script set source=\"\$getIncome\" todayincome;\r\
+    \n\r\
+    \n\t:local getSales (\$amt + \$getIncome);\r\
+    \n\t/system script set source=\"\$getSales\" todayincome;\r\
+    \n\r\
+    \n\t:local getMonthlyIncome [:put ([/system script get [find name=monthlyinc\
+    ome] source])];\r\
+    \n\t/system script set source=\"\$getMonthlyIncome\" monthlyincome;\r\
+    \n\r\
+    \n\t:local getMonthlySales (\$amt + \$getMonthlyIncome);\r\
+    \n\t/system script set source=\"\$getMonthlySales\" monthlyincome;\r\
+    \n\t\r\
+    \n\t:local validUntil [/sys scheduler get \$user next-run];\r\
+    \n\t\r\
+    \n\t/file print file=\"\$hotspotFolder/data/\$macNoCol\" where name=\"dummyf\
+    ile\"; \r\
+    \n\t:delay 1s; \r\
+    \n\t/file set \"\$hotspotFolder/data/\$macNoCol\" contents=\"\$user#\$validU\
+    ntil\";\r\
+    \n\t\r\
+    \n\t:if (\$enableTelegram=1) do={\r\
+    \n\t\t:local vendoNew;\r\
+    \n\t\t:for i from=0 to=([:len \$vendo] - 1) do={ \r\
+    \n\t\t  :local char [:pick \$vendo \$i]\r\
+    \n\t\t  :if (\$char = \" \") do={\r\
+    \n\t\t\t:set \$char \"%20\"\r\
+    \n\t\t  }\r\
+    \n\t\t  :set vendoNew (\$vendoNew . \$char)\r\
+    \n\t\t}\r\
+    \n\t\t/tool fetch url=\"https://api.telegram.org/bot\$telegramToken/sendmess\
+    age\?chat_id=\$chatId&text=<<======New Sales======>> %0A Vendo: \$vendoNew %\
+    0A Voucher: \$user %0A IP: \$address %0A MAC: \$mac %0A Amount: \$amt %0A Ex\
+    tended: \$ext %0A Total Time: \$totaltime %0A %0AToday Sales: \$getSales %0A\
+    Monthly Sales : \$getMonthlySales %0AActive Users: \$uactive%0A <<==========\
+    ===========>>\" keep-result=no;\r\
+    \n\t}\r\
+    \n\r\
+    \n};\r\
+    \n\r\
+    \n:if (\$enableRandomMacSyncFix=1) do={\r\
+    \n\t:local cmac \$\"mac-address\"\r\
+    \n\t:foreach AU in=[/ip hotspot active find user=\"\$username\"] do={\r\
+    \n\t  :local amac [/ip hotspot active get \$AU mac-address];\r\
+    \n\t  :if (\$cmac!=\$amac) do={  /ip hotspot active remove [/ip hotspot acti\
+    ve find mac-address=\"\$amac\"]; }\r\
+    \n\t}\r\
+    \n}\r\
+    \n\r\
+    \n\r\
+    \n\r\
+    \n" on-logout="### hotspot folder for HEX put flash/hotspot for haplite put \
+    hotspot only\r\
+    \n:local hotspotFolder \"hotspot\";\r\
+    \n\r\
+    \n:local mac \$\"mac-address\";\r\
+    \n:local macNoCol;\r\
+    \n:for i from=0 to=([:len \$mac] - 1) do={ \r\
+    \n  :local char [:pick \$mac \$i]\r\
+    \n  :if (\$char = \":\") do={\r\
+    \n\t:set \$char \"\"\r\
+    \n  }\r\
+    \n  :set macNoCol (\$macNoCol . \$char)\r\
+    \n}\r\
+    \n\t\r\
+    \n:if ([/ip hotspot user get [/ip hotspot user find where name=\"\$user\"] l\
+    imit-uptime] <= [/ip hotspot user get [/ip hotspot user find where name=\"\$\
+    user\"] uptime]) do={\r\
+    \n    /ip hotspot user remove \$user;\r\
+    \n\t/file remove \"\$hotspotFolder/data/\$macNoCol.txt\";\r\
+    \n\t/system sche remove [find name=\$user];\r\
+    \n}\r\
+    \n/sys sch set [find where name=\$user] comment=\"\";" rate-limit=3M/3M
+/queue tree
+add max-limit=15M name="Qos DOWNLOAD" parent=bridge.HS
+add max-limit=15M name="Qos UPLOAD" parent=ether1.ISP
+/queue type
+add kind=pcq name="gaming pcq dl" pcq-classifier=dst-address
+add kind=pcq name="gaming pcq up" pcq-classifier=src-address,src-port
+set 8 pcq-classifier=dst-address,dst-port
+/queue tree
+add limit-at=1M max-limit=15M name="BIG TRAFFIC" packet-mark=big-pkt parent=\
+    "Qos DOWNLOAD" priority=2 queue=pcq-download-default
+add limit-at=1M max-limit=5M name="SMALL TRAFFIC" packet-mark=small-pkt parent=\
+    "Qos DOWNLOAD" priority=4 queue=pcq-download-default
+add comment="===================================================================\
+    ============================================================================\
+    ====================" limit-at=1M max-limit=5M name="X GAMING" packet-mark=\
+    ml-pkt parent="Qos DOWNLOAD" priority=1 queue="gaming pcq dl"
+add limit-at=1M max-limit=15M name="BIG TRAFFIC UP" packet-mark=big-pkt parent=\
+    "Qos UPLOAD" priority=2 queue=pcq-upload-default
+add limit-at=1M max-limit=5M name="SMALL TRAFFIC UP" packet-mark=small-pkt \
+    parent="Qos UPLOAD" priority=4 queue=pcq-upload-default
+add comment="===================================================================\
+    ============================================================================\
+    ====================" limit-at=1M max-limit=5M name="X GAMING UP" \
+    packet-mark=ml-pkt parent="Qos UPLOAD" priority=1 queue="gaming pcq up"
+/interface bridge port
+add bridge=bridge.HS interface=ether2.HS
+add bridge=bridge.HS interface=ether3.HS
+add bridge=bridge.HS interface=wlan2
+/ip neighbor discovery-settings
+set discover-interface-list=!dynamic
+/ip address
+add address=10.0.0.1/24 interface=bridge.HS network=10.0.0.0
+add address=192.168.12.1/24 interface=bridge_LAN network=192.168.12.0
+/ip dhcp-client
+add disabled=no interface=ether1.ISP
+/ip dhcp-server lease
+add address=10.0.0.253 mac-address=50:02:91:E0:5D:DA server=dhcp1
+/ip dhcp-server network
+add address=10.0.0.0/24 gateway=10.0.0.1
+add address=192.168.12.0/24 gateway=192.168.12.1
+/ip dns
+set allow-remote-requests=yes servers=8.8.8.8,1.1.1.1
+/ip firewall filter
+add action=accept chain=input comment=NodeMCUIP src-address=10.0.0.253
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" \
+    disabled=yes
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" \
+    disabled=yes
+/ip firewall mangle
+add action=change-ttl chain=postrouting new-ttl=set:1 out-interface=bridge.HS \
+    passthrough=no
+add action=mark-connection chain=prerouting comment="BIG TRAFFIC" \
+    connection-bytes=2000000-0 dst-port=443,8080,80,20,21 new-connection-mark=\
+    bigtraffic-conn passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting connection-bytes=2000000-0 \
+    dst-port=443,8080,80,20,21 new-connection-mark=bigtraffic-conn passthrough=\
+    yes protocol=udp
+add action=mark-packet chain=prerouting connection-mark=bigtraffic-conn \
+    new-packet-mark=big-pkt passthrough=no
+add action=mark-connection chain=prerouting comment="SMALL TRAFFIC" dst-port=\
+    443,8080,80 new-connection-mark=smalltraffic-conn passthrough=yes protocol=\
+    tcp
+add action=mark-connection chain=prerouting dst-port=443,8080,80 \
+    new-connection-mark=smalltraffic-conn passthrough=yes protocol=udp
+add action=mark-packet chain=prerouting connection-mark=smalltraffic-conn \
+    new-packet-mark=small-pkt passthrough=no
+add action=mark-connection chain=prerouting comment=ML dst-port=\
+    5001,5003,9001,30000-30200 new-connection-mark=ml-connn passthrough=yes \
+    protocol=tcp
+add action=mark-packet chain=prerouting connection-mark=ml-connn \
+    new-packet-mark=ml-pkt passthrough=no
+/ip firewall nat
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" \
+    disabled=yes
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" \
+    disabled=yes
+add action=masquerade chain=srcnat out-interface=ether1.ISP
+add action=masquerade chain=srcnat comment="masquerade hotspot network" \
+    src-address=10.0.0.0/24
+/ip hotspot ip-binding
+add address=10.0.0.253 mac-address=50:02:91:E0:5D:DA server="HS SERVER" \
+    to-address=10.0.0.253 type=bypassed
+/ip hotspot user
+add email=new@gmail.com limit-uptime=1h name=B0B5C3A2ED9B
+/ip hotspot walled-garden
+add comment="place hotspot rules here" disabled=yes
+/ip hotspot walled-garden ip
+add action=accept disabled=no dst-address=10.0.0.253 !dst-address-list \
+    !dst-port !protocol !src-address !src-address-list
+/system clock
+set time-zone-name=Asia/Manila
+/system identity
+set name=PISOWIFI_BRGY_HALL
+/system scheduler
+add interval=5s name="uptime backup" on-event=":local hsactiveuptime;\r\
+    \n:local hsuser;\r\
+    \n:local hslimit;\r\
+    \n\r\
+    \n:if ([/ip hotspot active print count-only] > 0) do={\r\
+    \n:foreach i in=[/ip hotspot active find] do={\r\
+    \n:set hsactiveuptime [/ip hotspot active get \$i uptime];\r\
+    \n:set hsuser [/ip hotspot active get \$i user];\r\
+    \n:set hslimit [/ip hotspot user get \$hsuser limit-uptime];\r\
+    \n/system scheduler set [find where name=\$hsuser] comment=\"temp \$hsactive\
+    uptime\";\r\
+    \n\t\t}\r\
+    \n\t}\r\
+    \n" policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon \
+    start-time=startup
+add name="uptime restore" on-event=":local ucom;\r\
+    \n:local hsolduptime;\r\
+    \n:local hsnewuptime;\r\
+    \n:local hsactiveuptime;\r\
+    \n:local hsuser;\r\
+    \n:local temp; \r\
+    \n:foreach ie in=[/sys sch find] do={\r\
+    \n :set \$ucom [/sys sch get \$ie comment]; \r\
+    \n:if (\$ucom != \"\") do={ \r\
+    \n:set \$temp [:pick \$ucom 0 4];\r\
+    \n:if (\$temp = \"temp\") do={\r\
+    \n   :set \$hsuser [/sys sch get \$ie name]; \r\
+    \n:if ([/ip hotspot user find name=\$hsuser]) do={\r\
+    \n:set \$hsolduptime [/ip hotspot user get [find where name=\$hsuser] limit-\
+    uptime];\r\
+    \n:set \$hsactiveuptime [:pick \$ucom 5 ([:len \$ucom] + 1)]; \r\
+    \n:set \$hsnewuptime (hsolduptime - \$hsactiveuptime);\r\
+    \n/ip hotspot user set [find where name=\$hsuser] limit-uptime=\$hsnewuptime\
+    ;\r\
+    \n/sys sch set [find where name=\$hsuser] comment=\"\";} else={ /sys sch rem\
+    ove \$ie;}\r\
+    \n}}}" policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon \
+    start-time=startup
+add interval=1d name="Reset Daily Income" on-event=\
+    "/system script set source=\"0\" todayincome " policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon \
+    start-date=sep/28/2021 start-time=00:00:00
+add interval=4w2d name="Reset Monthly Income" on-event=\
+    "/system script set source=\"0\" monthlyincome " policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon \
+    start-date=sep/28/2021 start-time=00:00:00
+add comment="temp 00:39:57" interval=1h20m name=0CB527A73C46 on-event="/ip hotsp\
+    ot user remove [find name=0CB527A73C46]; /ip hotspot active remove [find use\
+    r=0CB527A73C46]; /ip hotspot cookie remove [find user=0CB527A73C46]; /system\
+    \_sche remove [find name=0CB527A73C46]; /file remove \"hotspot/data/0CB527A7\
+    3C46.txt\";" policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon \
+    start-date=nov/27/2023 start-time=08:01:01
+add comment="temp 00:37:07" interval=2h name=B0B5C3A2ED9B on-event="/ip hotspot \
+    user remove [find name=B0B5C3A2ED9B]; /ip hotspot active remove [find user=B\
+    0B5C3A2ED9B]; /ip hotspot cookie remove [find user=B0B5C3A2ED9B]; /system sc\
+    he remove [find name=B0B5C3A2ED9B]; /file remove \"hotspot/data/B0B5C3A2ED9B\
+    .txt\";" policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon \
+    start-date=nov/27/2023 start-time=08:28:59
+[admin@PISOWIFI_BRGY_HALL] > 

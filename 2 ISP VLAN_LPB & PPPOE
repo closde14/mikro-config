@@ -2,3 +2,48 @@ SOOON
 
 
 COMING THIS DECEMBER
+
+Pls Donate: GCASH 09071973112 (Fr***** A.) BADLY NEEDED KO PANG KAPE AT pang bili OLT 
+
+SHOUT SA MGA NAG DONATE>
+  MAR*** ABA*****
+  REV*** DAN*****
+  MIC*** BAL*****
+
+Wag nyo po ibenta ang script ko. Ma-agang pamasko po, at caroling ko na din po sainyo.
+MARAMING SALAMAT SA LAHAT NG MEMBERS NG GROUP< ADMIN< MODS AT MGA SHARER. 
+
+DISCLAIMER: May mga pupuna po sa config ko, yun mas may alam at expert, Sensya na master.. 
+Ito po para sa mga gusto matuto, nag sisimula pa lang. Sharing is caring. 
+KUNG MAY MALI PO SA SETUP KO, WAG NYO PO I POST at ibash ako. PM ME PARA MA AYUS KO. 
+LASTLY, sa mga gagamit, i custom nyo n lang depende sa set up nyo. 
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+DISCRIPTION:
+
+ETHER1	ISP1 = high bandwidth, no CGNAT, but slightly high ping (PLDT)
+ETHER2	ISP2 = CGNAT residendial, but low ping, 10ms (converge)
+ETHER3	LAN = LAN PORT 192.168.3.1
+ETHER4  LAN = MINI PC VLAN 13 . (pisowifi LPB OS) 192.168.88.1
+ETHER5	VLAN13 = CONNECT AP/SWITCH-HUB/MEDIACON/OLT HERE. VLAN-----13
+
+
+SIMPLE Q: AUTO REGESTRY FQCODEL for individual CLIENT
+	: AUTO DELETE SIMPLE Q when Client or user Disconnect or timed out
+
+LOADBALANCE:
+    All indicated game ports will go to ISP2 for lower ping.
+    incase you need to change game for to ISP 1 ++++++++++++++ ip/firewall/mangle find commnent "GG" and change routing mark from ISP2 to ISP1.
+
+
+    lahat ng browsing, video streaming at other connections ay pupunta sa Loadbalancing all ISP1,2. 
+    MAg tutulong tulong ang 2 ISP na sa other connection. 
+    naka set ang ISP1 sa 3/0 at 3/1, samantalang ang isp 2 3/2.
+
+FAILOVER: 
+naka set sa DNS recursive routing ang lahat ng ISP kaya wala ng ibang gagalawin
+naka set na mag failover and ISP2(GAMES) papunta sa isp1 at isp3 incase na mag down ang ISP2. 
+lahat ay automatic
+
+NETWATCH : ARP ONLY: when one isp is off, will failover to next ISP. 
+(NO DNS PING BEyond ANy isp. Currently unsupported with my ROS version.)

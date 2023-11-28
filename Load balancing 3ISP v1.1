@@ -18,11 +18,17 @@ ETHER5	LAN2 = NETWORK
 walang SIMPLE QUEUE ang set up na ito dahil walang Hotspot at PPPOE. 
 LOADBALANCE:All indicated game ports will go to ISP2 para sa mababang ping. HOWEVER!!!! lahat ng browsing, video streaming at other connections ay pupunta sa Loadbalancing all ISP1,2,3. MAg tutulong tulong ang 3 ISP na sa other connection with. naka set ang ISP1 sa 4/0 at 4/1, samantalang ang isp 2 at isp3 ay naka set sa 4/2 at 4/3 respectively.
 
+
 FAILOVER: 
 naka set sa DNS recursive routing ang lahat ng ISP kaya wala ng ibang gagalawin
 naka set na mag failover and ISP2(GAMES) papunta sa isp1 at isp3 incase na mag down ang ISP2. 
 lahat ay automatic
 ++++++++++++++++++++++++++++++++++++++++++++++++++
+NOTE! NOTE! NOTE!
+
+All indicated game ports will go to ISP2 for lower ping.
+    incase you need to change game for to ISP 1 ++++++++++++++ ip/firewall/mangle find commnent "GG" and change routing mark from ISP2 to ISP1.
+
 
 REQUIREMENTS:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

@@ -1,10 +1,3 @@
-SOON. 
-
-TO BE POSTED NOV 30 2023
-
-+++++++++++++++++++PPPOE
-+++++++++++++++++++NETWATCH (ROS 7.2 or lower)
-
 
 Pls Donate: GCASH 09071973112 (Fr***** A.) BADLY NEEDED KO PANG KAPE AT pang bili OLT 
 
@@ -15,7 +8,7 @@ DISCLAIMER: May mga pupuna po sa config ko, yun mas may alam at expert, Sensya n
 
 ***ADDED PPPOE
 ***PPPOE CLIENT with dynamic simple q and fqcodel
-*** tested A+ rating sa bufferbloat both HOTSPOT and PPPOE Clients.
+*** tested A+ rating sa bufferbloat for both HOTSPOT and PPPOE Clients.
 
 
 DISCRIPTION:
@@ -30,12 +23,17 @@ PPPOE	:2 sample client profile (3Mbps and 10Mbps), copy edit para mag dag dag ng
 	:dynamic simple Q sa PPPOE(fast removal sa simple Q upon client disconnection)	
 	:tested A+ sa bufferbloat
 
+SIMPLE Q: AUTO REGESTRY FQCODEL for individual CLIENT
+	: AUTO DELETE SIMPLE Q when Client or user Disconnect or timed out
+
 LOADBALANCE:All indicated game ports will go to ISP2 para sa mababang ping. HOWEVER!!!! lahat ng browsing, video streaming at other connections ay pupunta sa Loadbalancing all ISP1,2,3. MAg tutulong tulong ang 3 ISP na sa other connection with. naka set ang ISP1 sa 4/0 at 4/1, samantalang ang isp 2 at isp3 ay naka set sa 4/2 at 4/3 respectively.
 
 FAILOVER: 
 naka set sa DNS recursive routing ang lahat ng ISP kaya wala ng ibang gagalawin
 naka set na mag failover and ISP2(GAMES) papunta sa isp1 at isp3 incase na mag down ang ISP2. 
 lahat ay automatic
+
+NETWATCH : ARP ONLY: when one isp is off, will failover to next ISP. (NO DNS PING BEyond ANy isp. Currently unsupported with my ROS version.)
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 REQUIREMENTS:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -48,3 +46,245 @@ SET ISP3 modem to ether3 with IP 192.168.5.1
 
 Ether4 Network IP IS 10.0.0.1 (Hotspot) and 10.10.0.1 (pppoe) bridged 
 ETHER5 network ip is 192.168.4.1 bridged
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+  MMM      MMM       KKK                          TTTTTTTTTTT      KKK
+  MMMM    MMMM       KKK                          TTTTTTTTTTT      KKK
+  MMM MMMM MMM  III  KKK  KKK  RRRRRR     OOOOOO      TTT     III  KKK  KKK
+  MMM  MM  MMM  III  KKKKK     RRR  RRR  OOO  OOO     TTT     III  KKKKK
+  MMM      MMM  III  KKK KKK   RRRRRR    OOO  OOO     TTT     III  KKK KKK
+  MMM      MMM  III  KKK  KKK  RRR  RRR   OOOOOO      TTT     III  KKK  KKK
+
+  MikroTik RouterOS 7.2 (c) 1999-2022       https://www.mikrotik.com/
+
+Press F1 for help
+
+
+
+[admin@LoadBalancer] > export 
+# nov/28/2023 10:44:56 by RouterOS 7.2
+# software id = CNBR-XKV7
+#
+# model = RB750Gr3
+# serial number = HDD08CSY2TA
+/interface bridge
+add name=BRIDGE_4.1_ether5
+add name=PPPOE_HOTSPOT
+/interface ethernet
+set [ find default-name=ether1 ] name=ether1_PLDT
+set [ find default-name=ether2 ] name=ether2_Converge
+set [ find default-name=ether3 ] name=ether3_ISP3
+/interface list
+add name=WAN
+add name=LAN
+add name=WG
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip hotspot profile
+set [ find default=yes ] login-by=http-chap,http-pap
+add hotspot-address=10.0.0.1 html-directory=flash/hotspot login-by=\
+    http-chap,http-pap name=hsprof1
+/ip pool
+add name=4.1 ranges=192.168.4.3-192.168.4.254
+add name=Hotspot ranges=10.0.0.2-10.0.0.254
+add name=PPP ranges=10.10.0.2-10.10.0.254
+/ip dhcp-server
+add address-pool=4.1 bootp-support=dynamic interface=BRIDGE_4.1_ether5 \
+    lease-time=30m name=DHCP_4.1 server-address=192.168.4.1
+add address-pool=Hotspot interface=PPPOE_HOTSPOT lease-time=1h name=dhcp1
+/ip hotspot
+add address-pool=Hotspot disabled=no interface=PPPOE_HOTSPOT name=hotspot1 \
+    profile=hsprof1
+/port
+set 0 name=serial0
+/queue tree
+add disabled=yes name=queue1 packet-mark=Gaming parent=global
+/queue type
+add kind=fq-codel name=FQCODEL
+/ip hotspot user profile
+set [ find default=yes ] on-logout="/queue simple\r\
+    \nremove name=\"\$user\"" queue-type=FQCODEL rate-limit=3M/3M
+/ppp profile
+add dns-server=8.8.8.8,1.1.1.1 local-address=10.10.0.1 name=3M on-down=\
+    "/queue simple\r\
+    \nremove name=\"\$user\"" queue-type=FQCODEL rate-limit=3M/3M remote-address=\
+    PPP use-ipv6=no
+add dns-server=8.8.8.8,1.1.1.1 local-address=10.10.0.1 name=10M on-down=\
+    "/queue simple\r\
+    \nremove name=\"\$user\"" queue-type=FQCODEL rate-limit=10M/10M \
+    remote-address=PPP use-ipv6=no
+/routing table
+add disabled=no fib name=ISP1
+add disabled=no fib name=ISP2
+add disabled=no fib name=ISP3
+/interface bridge port
+add bridge=BRIDGE_4.1_ether5 interface=ether5
+add bridge=PPPOE_HOTSPOT interface=ether4
+/ipv6 settings
+set disable-ipv6=yes
+/interface list member
+add interface=ether1_PLDT list=WAN
+add interface=BRIDGE_4.1_ether5 list=LAN
+add interface=ether2_Converge list=WAN
+add interface=ether3_ISP3 list=WAN
+add list=WG
+add interface=PPPOE_HOTSPOT list=LAN
+/interface pppoe-server server
+add authentication=pap disabled=no interface=PPPOE_HOTSPOT one-session-per-host=\
+    yes service-name=PPPOE
+/ip address
+add address=192.168.4.1/24 interface=BRIDGE_4.1_ether5 network=192.168.4.0
+add address=10.0.0.1/24 interface=PPPOE_HOTSPOT network=10.0.0.0
+add address=10.10.0.1/24 interface=PPPOE_HOTSPOT network=10.10.0.0
+/ip dhcp-client
+add add-default-route=no interface=ether1_PLDT use-peer-dns=no
+add add-default-route=no interface=ether2_Converge use-peer-dns=no
+add add-default-route=no interface=ether3_ISP3 use-peer-dns=no
+/ip dhcp-server network
+add address=10.0.0.0/24 comment="hotspot network" gateway=10.0.0.1
+add address=192.168.3.0/24 dns-server=8.8.8.8 gateway=192.168.3.1 netmask=24
+add address=192.168.4.0/24 dns-server=8.8.8.8 gateway=192.168.4.1 netmask=24
+/ip dns
+set allow-remote-requests=yes servers=8.8.4.4,8.8.8.8
+/ip firewall address-list
+add address=10.0.0.2-10.0.0.254 list=LAN
+add address=192.168.4.2-192.168.4.254 list=LAN
+add address=10.10.0.2-10.10.0.254 list=LAN
+/ip firewall filter
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" \
+    disabled=yes
+/ip firewall mangle
+add action=accept chain=prerouting dst-address=192.168.1.0/24
+add action=accept chain=prerouting dst-address=192.168.2.0/24
+add action=accept chain=prerouting dst-address=192.168.4.0/24
+add action=accept chain=prerouting dst-address=192.168.5.0/24
+add action=accept chain=prerouting dst-address=192.168.3.0/24
+add action=mark-connection chain=prerouting comment=ML dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-connection-mark=\
+    GAMING_conn passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-connection-mark=\
+    GAMING_conn passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting comment=COD dst-port=\
+    10004-20999,7086-7995,41182-41192 new-connection-mark=GAMING_conn \
+    passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting dst-port=\
+    10004-20999,7086-7995,41182-41192 new-connection-mark=GAMING_conn \
+    passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting comment=PUBG dst-port=\
+    3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=GAMING_conn \
+    passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting dst-port=\
+    3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=GAMING_conn \
+    passthrough=yes protocol=tcp
+add action=mark-packet chain=prerouting connection-mark=GAMING_conn \
+    new-packet-mark=Gaming passthrough=yes
+add action=mark-routing chain=prerouting new-routing-mark=ISP2 packet-mark=Gaming \
+    passthrough=yes
+add action=mark-connection chain=prerouting comment=\
+    ++++++++++++++++++++++++++++++++++++++++ connection-mark=no-mark \
+    connection-state=new in-interface=ether1_PLDT new-connection-mark=ISP1_conn \
+    passthrough=yes
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new in-interface=ether2_Converge new-connection-mark=\
+    ISP2_conn passthrough=yes
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new in-interface=ether3_ISP3 new-connection-mark=ISP3_conn \
+    passthrough=yes
+add action=mark-routing chain=output comment=OUT connection-mark=ISP1_conn \
+    new-routing-mark=ISP1 passthrough=yes
+add action=mark-routing chain=output connection-mark=ISP3_conn new-routing-mark=\
+    ISP3 passthrough=yes
+add action=mark-routing chain=output connection-mark=ISP2_conn new-routing-mark=\
+    ISP2 passthrough=yes
+add action=mark-connection chain=prerouting comment=PCC connection-mark=no-mark \
+    connection-state=new dst-address-type=!local new-connection-mark=ISP1_conn \
+    passthrough=yes per-connection-classifier=src-address-and-port:4/0 \
+    src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new dst-address-type=!local new-connection-mark=ISP1_conn \
+    passthrough=yes per-connection-classifier=src-address-and-port:4/1 \
+    src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new dst-address-type=!local new-connection-mark=ISP3_conn \
+    passthrough=yes per-connection-classifier=src-address-and-port:4/2 \
+    src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new dst-address-type=!local new-connection-mark=ISP2_conn \
+    passthrough=yes per-connection-classifier=src-address-and-port:4/3 \
+    src-address-list=LAN
+add action=mark-routing chain=prerouting comment=Routing connection-mark=\
+    ISP1_conn new-routing-mark=ISP1 passthrough=yes src-address-list=LAN
+add action=mark-routing chain=prerouting connection-mark=ISP3_conn \
+    new-routing-mark=ISP3 passthrough=yes src-address-list=LAN
+add action=mark-routing chain=prerouting connection-mark=ISP2_conn \
+    new-routing-mark=ISP2 passthrough=yes src-address-list=LAN
+/ip firewall nat
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" \
+    disabled=yes
+add action=masquerade chain=srcnat out-interface=ether1_PLDT
+add action=masquerade chain=srcnat out-interface=ether2_Converge
+add action=masquerade chain=srcnat out-interface=ether3_ISP3
+add action=masquerade chain=srcnat comment="masquerade hotspot network" \
+    src-address=10.0.0.0/24
+add action=masquerade chain=srcnat src-address=10.10.0.0/24
+/ip hotspot user
+add name=admin
+add name=user1
+/ip route
+add check-gateway=ping comment=ISP1 disabled=no distance=2 dst-address=0.0.0.0/0 \
+    gateway=192.168.1.1 pref-src="" routing-table=ISP1 scope=30 \
+    suppress-hw-offload=no target-scope=10
+add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=\
+    192.168.2.1 pref-src="" routing-table=ISP2 scope=30 suppress-hw-offload=no \
+    target-scope=10
+add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=\
+    192.168.1.1 pref-src="" routing-table=main scope=30 suppress-hw-offload=no \
+    target-scope=10
+add disabled=no distance=3 dst-address=0.0.0.0/0 gateway=192.168.2.1 pref-src="" \
+    routing-table=main scope=30 suppress-hw-offload=no target-scope=10
+add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=\
+    192.168.5.40 pref-src="" routing-table=ISP3 scope=30 suppress-hw-offload=no \
+    target-scope=10
+add comment=ISP3 disabled=yes distance=4 dst-address=0.0.0.0/0 gateway=\
+    192.168.5.40 pref-src="" routing-table=ISP3 scope=30 suppress-hw-offload=no \
+    target-scope=10
+add comment=ISP2 disabled=no distance=3 dst-address=0.0.0.0/0 gateway=192.168.2.1 \
+    pref-src="" routing-table=ISP2 scope=30 suppress-hw-offload=no target-scope=\
+    10
+add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=\
+    1.1.1.1 routing-table=main scope=30 suppress-hw-offload=no target-scope=15
+add check-gateway=ping disabled=no distance=2 dst-address=0.0.0.0/0 gateway=\
+    1.0.0.1 pref-src="" routing-table=main scope=30 suppress-hw-offload=no \
+    target-scope=15
+add check-gateway=ping disabled=no distance=3 dst-address=0.0.0.0/0 gateway=\
+    9.9.9.9 pref-src="" routing-table=main scope=30 suppress-hw-offload=no \
+    target-scope=15
+add disabled=no distance=1 dst-address=1.1.1.1/32 gateway=192.168.1.1 pref-src="" \
+    routing-table=main scope=10 suppress-hw-offload=no target-scope=10
+add disabled=no distance=1 dst-address=1.0.0.1/32 gateway=192.168.2.1 pref-src="" \
+    routing-table=main scope=10 suppress-hw-offload=no target-scope=10
+add disabled=no distance=1 dst-address=9.9.9.9/32 gateway=192.168.5.40 pref-src=\
+    "" routing-table=main scope=10 suppress-hw-offload=no target-scope=10
+/ppp secret
+add name=3in1coffee profile=3M service=pppoe
+add name=10in1coffee profile=10M service=pppoe
+/routing rule
+add action=lookup-only-in-table disabled=no src-address=192.168.2.1/32 table=ISP2
+/system clock
+set time-zone-name=Asia/Manila
+/system identity
+set name=LoadBalancer
+/system ntp client servers
+add address=ntp.pool.org
+/tool netwatch
+add comment=isp2 down-script="ip/route disable [find comment=ISP2]" host=\
+    192.168.2.1 interval=10s up-script="ip/route enable [find comment=ISP2]"
+add comment=isp1 down-script="ip/route disable [find comment=ISP1]" host=\
+    192.168.1.1 interval=10s up-script="ip/route enable [find comment=ISP1]"
+add comment=isp3 down-script="ip/route disable [find comment=ISP3]" host=\
+    192.168.3.1 interval=10s up-script="ip/route enable [find comment=ISP3]"
+[admin@LoadBalancer] > 
+

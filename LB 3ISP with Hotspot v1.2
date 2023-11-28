@@ -23,10 +23,12 @@ ETHER4  LAN1 = HOTSPOT
 ETHER5	LAN2 = NETWORK 
 
 LOADBALANCE:
-   NOTE! NOTE! NOTE!
+ NOTE! NOTE! NOTE!
 
- All indicated game ports will go to ISP2 for lower ping.
-    incase you need to change game for to ISP 1 ++++++++++++++ ip/firewall/mangle find commnent "GG" and change routing mark from ISP2 to ISP1.
+All indicated game ports will go to ISP2 for lower ping.
+    incase you need to change game for to ISP 1 ++++++++++++++ ip/firewall/mangle find and change routing mark just  from ISP2 to ISP1.
+            {add action=mark-routing chain=prerouting new-routing-mark=ISP2 packet-mark=Gaming \
+    passthrough=yes}
 
 
 HOWEVER!!!! lahat ng browsing, video streaming at other connections ay pupunta sa Loadbalancing all ISP1,2,3. 

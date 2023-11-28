@@ -27,7 +27,9 @@ lahat ay automatic
 NOTE! NOTE! NOTE!
 
 All indicated game ports will go to ISP2 for lower ping.
-    incase you need to change game for to ISP 1 ++++++++++++++ ip/firewall/mangle find commnent "GG" and change routing mark from ISP2 to ISP1.
+    incase you need to change game for to ISP 1 ++++++++++++++ ip/firewall/mangle find and change routing mark just  from ISP2 to ISP1.
+            {add action=mark-routing chain=prerouting new-routing-mark=ISP2 packet-mark=Gaming \
+    passthrough=yes}
 
 
 REQUIREMENTS:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

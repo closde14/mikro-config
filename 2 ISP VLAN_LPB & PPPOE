@@ -1,7 +1,7 @@
 SOOON
 
 
-COMING THIS DECEMBER
+COMING THIS DECEMBER 7, 
 
 Pls Donate: GCASH 09071973112 (Fr***** A.) BADLY NEEDED KO PANG KAPE AT pang bili OLT 
 
@@ -36,7 +36,7 @@ SIMPLE Q: AUTO REGESTRY FQCODEL for individual CLIENT
 
 LOADBALANCE:
     All indicated game ports will go to ISP2 for lower ping.
-    incase you need to change game for to ISP 1 ++++++++++++++ ip/firewall/mangle find commnent "GG" and change routing mark from ISP2 to ISP1.
+    incase you need to change game for to ISP 1 ++++++++++++++ ip/firewall/mangle change routing mark from ISP2 to ISP1.
 
 
     lahat ng browsing, video streaming at other connections ay pupunta sa Loadbalancing all ISP1,2. 

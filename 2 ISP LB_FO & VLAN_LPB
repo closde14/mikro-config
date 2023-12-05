@@ -28,9 +28,6 @@ ETHER4  LAN = MINI PC VLAN 13 . (pisowifi LPB OS) 192.168.88.1
 ETHER5	VLAN13 = CONNECT AP/SWITCH-HUB/MEDIACON/OLT HERE. VLAN-----13
 
 
-SIMPLE Q: AUTO REGESTRY FQCODEL for individual CLIENT
-	: AUTO DELETE SIMPLE Q when Client or user Disconnect or timed out
-
 LOADBALANCE:
     All indicated game ports will go to ISP2 for lower ping.
     incase you need to change game for to ISP 1 ++++++++++++++ ip/firewall/mangle change routing mark from ISP2 to ISP1.

@@ -1,4 +1,33 @@
 
+Pls Donate: GCASH 09071973112 (Fr***** A.) BADLY NEEDED KO PANG KAPE AT pang bili OLT 
+
+SHOUT SA MGA NAG DONATE>
+  MAR*** ABA*****
+  REV*** DAN*****
+  MIC*** BAL*****
+  A** *** NAM****
+  RO*** INC***** 
+  plus 4 Anonimous person
+  	
+Wag nyo po ibenta ang script ko. Ma-agang pamasko po, at caroling ko na din po sainyo.
+MARAMING SALAMAT SA LAHAT NG MEMBERS NG GROUP< ADMIN< MODS AT MGA SHARER. 
+
+DISCLAIMER: May mga pupuna po sa config ko, yun mas may alam at expert, Sensya na master.. 
+Ito po para sa mga gusto matuto, nag sisimula pa lang. Sharing is caring. 
+KUNG MAY MALI PO SA SETUP KO, WAG NYO PO I POST at ibash ako. PM ME PARA MA AYUS KO. 
+LASTLY, sa mga gagamit, i custom nyo n lang depende sa set up nyo. 
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+DISCRIPTION:
+
+ETHER1	ISP
+ETHER2	LAN =192.168.10.1	
+ETHER3	lpb minipc or opi one 192.168.88.1
+ETHER4  VLAN 13 .
+
+
+HAPLITE 
+
 
 
   MMM      MMM       KKK                          TTTTTTTTTTT      KKK
@@ -15,32 +44,6 @@ Press F1 for help
 
 
 
-(27 messages not shown)
-dec/05/2023 13:35:52 system,error,critical login failure for user admin from E0:
-DB:55:AF:83:25 via winbox
-dec/05/2023 13:35:57 system,error,critical login failure for user admin from E0:
-DB:55:AF:83:25 via winbox
-dec/05/2023 13:36:13 system,error,critical login failure for user admin from E0:
-DB:55:AF:83:25 via winbox
-dec/05/2023 13:36:40 system,critical,info cloud change time Dec/05/2023 13:36:13
- => Dec/05/2023 13:36:40
-jan/02/1970 00:00:16 system,error,critical router was rebooted without proper sh
-utdown
-dec/05/2023 13:39:09 system,critical,info cloud change time Jan/02/1970 00:00:42
- => Dec/05/2023 13:39:09
-dec/05/2023 21:39:18 system,error,critical login failure for user admin from 192
-.168.100.37 via winbox
-dec/05/2023 13:48:19 system,critical,info cloud change time Jan/02/1970 00:07:43
- => Dec/05/2023 13:48:19
-
-Change your password
-new password> *****
-repeat new password> *****
-Try again, error: New passwords do not match!
-new password> *****
-repeat new password> *****
-
-Password changed
 [admin@MikroTik] > export 
 # dec/05/2023 22:01:13 by RouterOS 7.9
 # software id = P330-EIL7

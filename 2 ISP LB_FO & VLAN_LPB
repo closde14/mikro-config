@@ -47,3 +47,198 @@ lahat ay automatic
 
 NETWATCH : ARP ONLY: when one isp is off, will failover to next ISP. 
 (NO DNS PING BEyond ANy isp. Currently unsupported with my ROS version.)
+________________________________________________________
+
+requirements
+MT ros 7.2
+
+isp1 set to 192.168.4.1
+isp2 set to 192.168.5.40
+lan 192.168.3.1
+ether 4 192.168.88.1
+
+_______________________________________________________
+
+
+  MMM      MMM       KKK                          TTTTTTTTTTT      KKK
+  MMMM    MMMM       KKK                          TTTTTTTTTTT      KKK
+  MMM MMMM MMM  III  KKK  KKK  RRRRRR     OOOOOO      TTT     III  KKK  KKK
+  MMM  MM  MMM  III  KKKKK     RRR  RRR  OOO  OOO     TTT     III  KKKKK
+  MMM      MMM  III  KKK KKK   RRRRRR    OOO  OOO     TTT     III  KKK KKK
+  MMM      MMM  III  KKK  KKK  RRR  RRR   OOOOOO      TTT     III  KKK  KKK
+
+  MikroTik RouterOS 7.2 (c) 1999-2022       https://www.mikrotik.com/
+
+Press F1 for help
+
+bad command name ex (line 1 column 1)
+[admin@SERVER_CISCO] > export 
+# dec/01/2023 23:09:32 by RouterOS 7.2
+# software id = CTVL-C190
+#
+# model = RB750Gr3
+# serial number = D5030F135784
+
+
+
+
+/interface bridge
+add name=For_LAN
+add ingress-filtering=no name=For_VLAN vlan-filtering=yes
+/interface ethernet
+set [ find default-name=ether1 ] name=ether1_ISP1
+set [ find default-name=ether2 ] name=ether2_ISP2
+set [ find default-name=ether3 ] comment=LAN name=ether3_LAN
+set [ find default-name=ether4 ] comment=VLAN name=ether4_LPB
+set [ find default-name=ether5 ] name=ether5_VLAN13
+/interface list
+add include=all name=LAN
+add include=all name=WAN
+add include=all name=WG
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip pool
+add name=VLAN ranges=192.168.88.2-192.168.88.254
+add name=LAN ranges=192.168.3.4-192.168.3.254
+/ip dhcp-server
+add add-arp=yes address-pool=VLAN interface=For_VLAN name=VLAN server-address=192.168.88.1
+add address-pool=LAN interface=For_LAN name=LAN
+/port
+set 0 name=serial0
+/queue simple
+add limit-at=40M/40M max-limit=40M/40M name="Server Computer" target=192.168.3.5/32
+add disabled=no limit-at=6M/6M max-limit=6M/6M name=FAST packet-marks=FAST_DL,FAST_UP \
+    parent="Server Computer" target=""
+add disabled=no limit-at=1M/1M max-limit=1M/1M name=Games packet-marks=Games_DL,Games_UP \
+    parent="Server Computer" priority=2/2 target=""
+add disabled=no limit-at=4M/4M max-limit=4M/4M name=Browsing parent="Server Computer" \
+    priority=1/1 target=""
+/queue type
+add kind=fq-codel name=FQCODEL
+/ip hotspot user profile
+set [ find default=yes ] address-pool=HS keepalive-timeout=10m queue-type=FQCODEL rate-limit=\
+    3M/3M
+/routing table
+add disabled=no fib name=ISP1
+add disabled=no fib name=ISP2
+/interface bridge port
+add bridge=For_VLAN interface=ether4_LPB
+add bridge=For_VLAN interface=ether5_VLAN13 pvid=13
+add bridge=For_LAN interface=ether3_LAN
+/interface bridge vlan
+add bridge=For_VLAN tagged=ether4_LPB untagged=ether5_VLAN13 vlan-ids=13
+/interface list member
+add interface=ether1_ISP1 list=WAN
+add interface=ether3_LAN list=LAN
+add interface=ether4_LPB list=LAN
+add interface=ether5_VLAN13 list=LAN
+add interface=ether2_ISP2 list=WAN
+/ip address
+add address=192.168.88.1/24 interface=For_VLAN network=192.168.88.0
+add address=192.168.3.1/24 interface=For_LAN network=192.168.3.0
+add address=192.168.5.25 interface=ether2_ISP2 network=192.168.5.0
+/ip dhcp-client
+add add-default-route=no interface=ether1_ISP1
+add add-default-route=no interface=ether2_ISP2
+/ip dhcp-server network
+add address=192.168.3.0/24 dns-server=8.8.8.8,1.1.1.1 gateway=192.168.3.1
+add address=192.168.88.0/24 dns-server=8.8.8.8,1.1.1.1 gateway=192.168.88.1
+/ip dns
+set allow-remote-requests=yes servers=8.8.8.8,1.1.1.1
+/ip firewall address-list
+add address=192.168.4.0/24 list=ISP1
+add address=192.168.2.0/24 list=ISP2
+add address=192.168.88.0/24 list=LAN
+add address=192.168.3.0/24 list=LAN
+/ip firewall mangle
+add action=accept chain=prerouting dst-address=192.168.1.0/24
+add action=accept chain=prerouting dst-address=192.168.2.0/24
+add action=accept chain=prerouting dst-address=192.168.3.0/24
+add action=accept chain=prerouting dst-address=192.168.4.0/24
+add action=accept chain=prerouting dst-address=192.168.5.0/24
+add action=accept chain=prerouting dst-address=192.168.88.0/24 dst-address-list=""
+add action=mark-connection chain=prerouting comment=GAMES_ML_CODM_PUBGM dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-connection-mark=Games_conn \
+    passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting dst-port=10004-20999,7086-7995,41182-41192 \
+    new-connection-mark=Games_conn passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting dst-port=\
+    3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=Games_conn passthrough=\
+    yes protocol=tcp
+add action=mark-connection chain=prerouting dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-connection-mark=Games_conn \
+    passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting dst-port=10004-20999,7086-7995,41182-41192 \
+    new-connection-mark=Games_conn passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting dst-port=\
+    3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=Games_conn passthrough=\
+    yes protocol=udp
+add action=mark-packet chain=prerouting connection-mark=Games_conn new-packet-mark=Games \
+    passthrough=yes
+add action=mark-routing chain=prerouting comment=GG new-routing-mark=ISP1 packet-mark=Games \
+    passthrough=yes
+add action=mark-connection chain=prerouting comment=********** connection-mark=no-mark \
+    connection-state=new in-interface=ether1_ISP1 new-connection-mark=ISP1_conn passthrough=\
+    yes
+add action=mark-connection chain=prerouting connection-mark=no-mark connection-state=new \
+    in-interface=ether2_ISP2 new-connection-mark=ISP2_conn passthrough=yes
+add action=mark-routing chain=output comment=********** connection-mark=ISP1_conn \
+    new-routing-mark=ISP1 passthrough=yes
+add action=mark-routing chain=output connection-mark=ISP2_conn new-routing-mark=ISP2 \
+    passthrough=yes
+add action=mark-connection chain=prerouting comment=********** connection-mark=no-mark \
+    connection-state=new dst-address-type=!local new-connection-mark=ISP1_conn passthrough=\
+    yes per-connection-classifier=src-address-and-port:3/0 src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark connection-state=new \
+    dst-address-type=!local new-connection-mark=ISP1_conn passthrough=yes \
+    per-connection-classifier=src-address-and-port:3/1 src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark connection-state=new \
+    dst-address-type=!local new-connection-mark=ISP2_conn passthrough=yes \
+    per-connection-classifier=src-address-and-port:3/2 src-address-list=LAN
+add action=mark-routing chain=prerouting comment=********** connection-mark=ISP1_conn \
+    new-routing-mark=ISP1 passthrough=yes src-address-list=LAN
+add action=mark-routing chain=prerouting connection-mark=ISP1_conn new-routing-mark=ISP2 \
+    passthrough=yes src-address-list=LAN
+add action=mark-connection chain=prerouting content=fast.com dst-port=443,8080 \
+    new-connection-mark=fast_conn passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting content=oca.nflxvideo.net dst-port=443,8080 \
+    new-connection-mark=fast_conn passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting dst-address=143.44.160.30 dst-port=443,8080 \
+    new-connection-mark=fast_conn passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting dst-port=443,8080 new-connection-mark=fast_conn \
+    passthrough=yes protocol=tcp src-address=143.44.160.30
+add action=mark-packet chain=forward connection-mark=fast_conn new-packet-mark=FAST_DL \
+    out-interface-list=LAN passthrough=yes
+add action=mark-packet chain=forward connection-mark=fast_conn in-interface-list=LAN \
+    new-packet-mark=FAST_UP passthrough=yes
+/ip firewall nat
+add action=masquerade chain=srcnat out-interface=ether1_ISP1 src-address-list=""
+add action=masquerade chain=srcnat out-interface=ether2_ISP2 src-address-list=""
+/ip route
+add check-gateway=ping comment=ISP1 disabled=no distance=1 dst-address=0.0.0.0/0 gateway=\
+    192.168.4.1 pref-src="" routing-table=main scope=30 suppress-hw-offload=no target-scope=\
+    10
+add disabled=no distance=1 dst-address=1.1.1.1/32 gateway=192.168.4.1 pref-src="" \
+    routing-table=main scope=10 suppress-hw-offload=no target-scope=10
+add check-gateway=ping disabled=no distance=2 dst-address=0.0.0.0/32 gateway=1.0.0.1 \
+    pref-src="" routing-table=main scope=30 suppress-hw-offload=no target-scope=15
+add check-gateway=ping comment=ISP1 disabled=no distance=2 dst-address=0.0.0.0/0 gateway=\
+    192.168.4.1 pref-src="" routing-table=ISP1 scope=30 suppress-hw-offload=no target-scope=\
+    10
+add check-gateway=ping comment=ISP2 disabled=no distance=1 dst-address=0.0.0.0/0 gateway=\
+    192.168.5.40 pref-src="" routing-table=ISP2 scope=30 suppress-hw-offload=no target-scope=\
+    10
+add check-gateway=ping comment=ISP2 disabled=no distance=3 dst-address=0.0.0.0/0 gateway=\
+    192.168.5.40 pref-src="" routing-table=main scope=30 suppress-hw-offload=no target-scope=\
+    10
+add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=1.1.1.1 \
+    routing-table=main scope=30 suppress-hw-offload=no target-scope=15
+add disabled=no distance=1 dst-address=1.0.0.1/32 gateway=192.168.5.40 pref-src="" \
+    routing-table=main scope=10 suppress-hw-offload=no target-scope=10
+
+/system clock
+set time-zone-name=Asia/Manila
+/system identity
+set name=SERVER_CISCO
+[admin@SERVER_CISCO] > 
+

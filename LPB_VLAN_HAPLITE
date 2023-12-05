@@ -1,0 +1,105 @@
+
+
+
+  MMM      MMM       KKK                          TTTTTTTTTTT      KKK
+  MMMM    MMMM       KKK                          TTTTTTTTTTT      KKK
+  MMM MMMM MMM  III  KKK  KKK  RRRRRR     OOOOOO      TTT     III  KKK  KKK
+  MMM  MM  MMM  III  KKKKK     RRR  RRR  OOO  OOO     TTT     III  KKKKK
+  MMM      MMM  III  KKK KKK   RRRRRR    OOO  OOO     TTT     III  KKK KKK
+  MMM      MMM  III  KKK  KKK  RRR  RRR   OOOOOO      TTT     III  KKK  KKK
+
+  MikroTik RouterOS 7.9 (c) 1999-2023       https://www.mikrotik.com/
+
+Press F1 for help
+
+
+
+
+(27 messages not shown)
+dec/05/2023 13:35:52 system,error,critical login failure for user admin from E0:
+DB:55:AF:83:25 via winbox
+dec/05/2023 13:35:57 system,error,critical login failure for user admin from E0:
+DB:55:AF:83:25 via winbox
+dec/05/2023 13:36:13 system,error,critical login failure for user admin from E0:
+DB:55:AF:83:25 via winbox
+dec/05/2023 13:36:40 system,critical,info cloud change time Dec/05/2023 13:36:13
+ => Dec/05/2023 13:36:40
+jan/02/1970 00:00:16 system,error,critical router was rebooted without proper sh
+utdown
+dec/05/2023 13:39:09 system,critical,info cloud change time Jan/02/1970 00:00:42
+ => Dec/05/2023 13:39:09
+dec/05/2023 21:39:18 system,error,critical login failure for user admin from 192
+.168.100.37 via winbox
+dec/05/2023 13:48:19 system,critical,info cloud change time Jan/02/1970 00:07:43
+ => Dec/05/2023 13:48:19
+
+Change your password
+new password> *****
+repeat new password> *****
+Try again, error: New passwords do not match!
+new password> *****
+repeat new password> *****
+
+Password changed
+[admin@MikroTik] > export 
+# dec/05/2023 22:01:13 by RouterOS 7.9
+# software id = P330-EIL7
+#
+# model = RB941-2nD
+# serial number = 7DE707BDF823
+/interface bridge
+add name=bridge_LAN
+add ingress-filtering=no name=bridge_LPB vlan-filtering=yes
+/interface ethernet
+set [ find default-name=ether1 ] name=ether1_ISP
+set [ find default-name=ether2 ] name=ether2_LAN
+set [ find default-name=ether3 ] name=ether3_LPB
+set [ find default-name=ether4 ] name=ether4_AP
+/interface wireless
+set [ find default-name=wlan1 ] ssid=MikroTik
+/interface list
+add name=LAN
+add name=WAN
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip pool
+add name=LPB ranges=192.168.88.10-192.168.88.100
+add name=LAN ranges=192.168.10.10-192.168.10.100
+/ip dhcp-server
+add address-pool=LAN interface=bridge_LAN name=LAN_DHCP
+add address-pool=LPB interface=bridge_LPB name=LPB_DHCP
+/interface bridge port
+add bridge=bridge_LPB interface=wlan1 pvid=13
+add bridge=bridge_LPB interface=ether4_AP pvid=13
+add bridge=bridge_LPB interface=ether3_LPB
+add bridge=bridge_LAN interface=ether2_LAN
+/interface bridge vlan
+add bridge=bridge_LPB tagged=ether3_LPB untagged=wlan1,ether4_AP vlan-ids=13
+/interface list member
+add interface=wlan1 list=LAN
+add interface=ether2_LAN list=LAN
+add interface=ether3_LPB list=LAN
+add interface=ether4_AP list=LAN
+add interface=ether1_ISP list=WAN
+/ip address
+add address=192.168.88.1/24 interface=bridge_LPB network=192.168.88.0
+add address=192.168.10.1/24 interface=bridge_LAN network=192.168.10.0
+/ip dhcp-client
+add interface=ether1_ISP
+/ip dhcp-server network
+add address=192.168.10.0/24 dns-server=8.8.8.8,8.8.4.4 gateway=192.168.10.1
+add address=192.168.88.0/24 dns-server=8.8.8.8,8.8.4.4 gateway=192.168.88.1
+/ip dns
+set servers=8.8.8.8,8.8.4.4
+/ip firewall mangle
+add action=accept chain=prerouting dst-address=192.168.10.0/24
+add action=accept chain=prerouting dst-address=192.168.1.0/24
+add action=accept chain=prerouting dst-address=192.168.100.0/24
+add action=accept chain=prerouting dst-address=192.168.88.0/24
+/ip firewall nat
+add action=masquerade chain=srcnat out-interface=ether1_ISP
+/system clock
+set time-zone-name=Asia/Manila
+/system note
+set show-at-login=no
+[admin@MikroTik] > 

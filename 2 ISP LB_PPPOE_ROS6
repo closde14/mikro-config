@@ -152,9 +152,9 @@ add action=mark-connection chain=prerouting dst-port=3013,50000,65010,65050,7085
     GAMING_conn passthrough=yes protocol=tcp
 add action=mark-packet chain=prerouting connection-mark=GAMING_conn new-packet-mark=Gaming passthrough=yes
 add action=mark-routing chain=prerouting new-routing-mark=ISP2 packet-mark=Gaming passthrough=yes
-add action=mark-connection chain=prerouting comment=+++++++++++++++++++++++++ connection-mark=no-mark connection-state=\
+add action=mark-connection chain=input comment=+++++++++++++++++++++++++ connection-mark=no-mark connection-state=\
     new in-interface=ether1-ISP new-connection-mark=ISP1 passthrough=yes
-add action=mark-connection chain=prerouting connection-mark=no-mark connection-state=new in-interface=ether2-ISP2 \
+add action=mark-connection chain=input connection-mark=no-mark connection-state=new in-interface=ether2-ISP2 \
     new-connection-mark=ISP2 passthrough=yes
 add action=mark-routing chain=output comment=OUT connection-mark=ISP1_conn new-routing-mark=ISP1 passthrough=yes
 add action=mark-routing chain=output connection-mark=ISP2_conn new-routing-mark=ISP2 passthrough=yes

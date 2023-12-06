@@ -42,14 +42,16 @@ LOADBALANCE:
     lahat ng browsing, video streaming at other connections ay pupunta sa Loadbalancing all ISP1,2. 
     MAg tutulong tulong ang 2 ISP na sa other connection. 
     naka set ang ISP1 sa 3/0 at 3/1, samantalang ang isp 2 3/2.
+********************
+dec 7 2023... there is a known bug in the failover recursive routing in this config
+
 
 FAILOVER: 
 naka set sa DNS recursive routing ang lahat ng ISP kaya wala ng ibang gagalawin
 naka set na mag failover and ISP2(GAMES) papunta sa isp1 at isp3 incase na mag down ang ISP2. 
 lahat ay automatic
 
-NETWATCH : ARP ONLY: when one isp is off, will failover to next ISP. 
-(NO DNS PING BEyond ANy isp. Currently unsupported with my ROS version.)
+
 ________________________________________________________
 
 

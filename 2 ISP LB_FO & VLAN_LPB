@@ -40,6 +40,9 @@ LOADBALANCE:
     MAg tutulong tulong ang 2 ISP na sa other connection. 
     naka set ang ISP1 sa 3/0 at 3/1, samantalang ang isp 2 3/2.
 
+******
+as of dec 7 2023............. there is known bug in failover on this config.
+
 FAILOVER: 
 naka set sa DNS recursive routing ang lahat ng ISP kaya wala ng ibang gagalawin
 naka set na mag failover and ISP2(GAMES) papunta sa isp1 at isp3 incase na mag down ang ISP2. 

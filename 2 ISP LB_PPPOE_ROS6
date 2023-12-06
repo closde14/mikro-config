@@ -1,0 +1,157 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  MMM      MMM       KKK                          TTTTTTTTTTT      KKK
+  MMMM    MMMM       KKK                          TTTTTTTTTTT      KKK
+  MMM MMMM MMM  III  KKK  KKK  RRRRRR     OOOOOO      TTT     III  KKK  KKK
+  MMM  MM  MMM  III  KKKKK     RRR  RRR  OOO  OOO     TTT     III  KKKKK
+  MMM      MMM  III  KKK KKK   RRRRRR    OOO  OOO     TTT     III  KKK KKK
+  MMM      MMM  III  KKK  KKK  RRR  RRR   OOOOOO      TTT     III  KKK  KKK
+
+  MikroTik RouterOS 6.48.7 (c) 1999-2023       http://www.mikrotik.com/
+
+[?]             Gives the list of available commands
+command [?]     Gives help on the command and list of arguments
+
+[Tab]           Completes the command/word. If the input is ambiguous,
+                a second [Tab] gives possible options
+
+/               Move up to base level
+..              Move up one level
+/command        Use command at the base level
+[admin@RouterOS] > export 
+# dec/06/2023 08:33:18 by RouterOS 6.48.7
+# software id = F824-DRX8
+#
+# model = RB750Gr3
+# serial number = HEX099GZT7G
+/interface bridge
+add name=bridge1-PPPoE
+add name=bridge2-LAN
+/interface ethernet
+set [ find default-name=ether1 ] name=ether1-ISP
+set [ find default-name=ether2 ] name=ether2-ISP2
+set [ find default-name=ether3 ] name=ether3-PPPoE
+set [ find default-name=ether4 ] name=ether4-PPPoE
+set [ find default-name=ether5 ] name=ether5-LAN
+/interface list
+add name=LAN
+add name=WAN
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip hotspot profile
+set [ find default=yes ] html-directory=hotspot
+/ip pool
+add name="PPPoE Clients" ranges=192.168.20.10-192.168.20.254
+add name=DHCP-lan ranges=192.168.21.2-192.168.21.254
+add name=dhcp_pool2 ranges=192.168.21.2-192.168.21.254
+/ip dhcp-server
+add address-pool=dhcp_pool2 disabled=no interface=bridge2-LAN name=dhcp1
+/queue simple
+add max-limit=100/100 name="PPPoE Total Bandwidth" target=192.168.20.0/24
+/ppp profile
+add dns-server=8.8.8.8,8.8.4.4 local-address=192.168.20.1 name=10MB parent-queue="PPPoE Total Bandwidth" rate-limit=\
+    10M/10M remote-address="PPPoE Clients" use-encryption=yes
+add dns-server=8.8.8.8,8.8.4.4 local-address=192.168.20.1 name=15MB parent-queue="PPPoE Total Bandwidth" rate-limit=\
+    15M/15M remote-address="PPPoE Clients" use-encryption=yes
+/interface bridge port
+add bridge=bridge1-PPPoE interface=ether3-PPPoE
+add bridge=bridge1-PPPoE interface=ether4-PPPoE
+add bridge=bridge2-LAN interface=ether5-LAN
+/interface list member
+add interface=ether4-PPPoE list=LAN
+add interface=ether3-PPPoE list=LAN
+add interface=ether5-LAN list=LAN
+add interface=ether1-ISP list=WAN
+add interface=ether2-ISP2 list=WAN
+/interface pppoe-server server
+add disabled=no interface=bridge1-PPPoE one-session-per-host=yes service-name="PPPoE Serber"
+/ip address
+add address=192.168.21.1/24 interface=bridge2-LAN network=192.168.21.0
+/ip dhcp-client
+add add-default-route=no disabled=no interface=ether1-ISP
+add add-default-route=no disabled=no interface=ether2-ISP2
+/ip dhcp-server network
+add address=192.168.21.0/24 dns-server=8.8.8.8,8.8.4.4 gateway=192.168.21.1
+/ip dns
+set allow-remote-requests=yes servers=8.8.8.8,8.8.4.4
+/ip firewall address-list
+add address=192.168.2.0/24 list=WAN
+add address=192.168.21.0/24 list=LAN
+add address=192.168.1.0/24 list=WAN
+add address=192.168.20.0/24 list=LAN
+/ip firewall mangle
+add action=accept chain=prerouting dst-address=192.168.1.0/24
+add action=accept chain=prerouting dst-address=192.168.2.0/24
+add action=accept chain=prerouting dst-address=192.168.20.0/24
+add action=accept chain=prerouting dst-address=192.168.21.0/24
+add action=accept chain=prerouting dst-address=192.168.21.0/24
+add action=mark-connection chain=prerouting comment=ML dst-port=2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 \
+    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting dst-port=2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 \
+    new-connection-mark=GAMING_conn passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting comment=COD dst-port=10004-20999,7086-7995,41182-41192 new-connection-mark=\
+    GAMING_conn passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting dst-port=10004-20999,7086-7995,41182-41192 new-connection-mark=GAMING_conn \
+    passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting comment=PUBG dst-port=3013,50000,65010,65050,7085-7995,49152-65535 \
+    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting dst-port=3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=\
+    GAMING_conn passthrough=yes protocol=tcp
+add action=mark-packet chain=prerouting connection-mark=GAMING_conn new-packet-mark=Gaming passthrough=yes
+add action=mark-routing chain=prerouting new-routing-mark=ISP2 packet-mark=Gaming passthrough=yes
+add action=mark-connection chain=prerouting comment=+++++++++++++++++++++++++ connection-mark=no-mark connection-state=\
+    new in-interface=ether1-ISP new-connection-mark=ISP1 passthrough=yes
+add action=mark-connection chain=prerouting connection-mark=no-mark connection-state=new in-interface=ether2-ISP2 \
+    new-connection-mark=ISP2 passthrough=yes
+add action=mark-routing chain=output comment=OUT connection-mark=ISP1_conn new-routing-mark=ISP1 passthrough=yes
+add action=mark-routing chain=output connection-mark=ISP2_conn new-routing-mark=ISP2 passthrough=yes
+add action=mark-connection chain=prerouting comment=PCC connection-mark=no-mark connection-state=new dst-address-type=\
+    !local new-connection-mark=ISP1_conn passthrough=yes per-connection-classifier=src-address-and-port:3/0 \
+    src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark connection-state=new dst-address-type=!local \
+    new-connection-mark=ISP1_conn passthrough=yes per-connection-classifier=src-address-and-port:3/1 src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark connection-state=new dst-address-type=!local \
+    new-connection-mark=ISP2_conn passthrough=yes per-connection-classifier=src-address-and-port:3/2 src-address-list=LAN
+add action=mark-routing chain=prerouting comment=Routing connection-mark=ISP1_conn new-routing-mark=ISP1 passthrough=yes \
+    src-address-list=LAN
+add action=mark-routing chain=prerouting connection-mark=ISP2_conn new-routing-mark=ISP2 passthrough=yes \
+    src-address-list=LAN
+/ip firewall nat
+add action=masquerade chain=srcnat out-interface=ether1-ISP
+/ip route
+add check-gateway=ping comment=ISP2 distance=1 gateway=192.168.2.1 routing-mark=ISP2
+add check-gateway=ping distance=1 gateway=192.168.2.1 routing-mark=ISP2
+add check-gateway=ping distance=1 gateway=192.168.1.1 routing-mark=ISP1
+add check-gateway=ping comment=ISP1 distance=1 gateway=192.168.1.1
+add check-gateway=ping distance=1 gateway=1.1.1.1 target-scope=15
+add comment=ISP1 distance=1 gateway=192.168.1.1
+add distance=1 gateway=192.168.1.1,192.168.2.1
+add check-gateway=ping comment=ISP2 distance=2 gateway=192.168.2.1
+add check-gateway=ping distance=2 dst-address=0.0.0.0/32 gateway=1.0.0.1 target-scope=15
+add check-gateway=ping distance=1 dst-address=1.0.0.1/32 gateway=192.168.2.1
+add distance=1 dst-address=1.1.1.1/32 gateway=192.168.1.1 scope=10
+/ppp secret
+add name=TEST password=12345 profile=15MB service=pppoe
+/system clock
+set time-zone-name=Asia/Manila
+/system identity
+set name=RouterOS
+/tool netwatch
+add comment=ISP1 down-script="ip route disable [find comment=ISP1]" host=1.1.1.1 interval=10s up-script=\
+    "ip route enable [find comment=ISP1]"
+add comment=ISP2 down-script="ip route disable [find comment=ISP2]" host=1.0.0.1 interval=10s up-script=\
+    "ip route enable [find comment=ISP2]"
+[admin@RouterOS] > 

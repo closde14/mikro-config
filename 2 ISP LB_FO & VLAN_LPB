@@ -177,10 +177,10 @@ add action=mark-packet chain=prerouting connection-mark=Games_conn new-packet-ma
     passthrough=yes
 add action=mark-routing chain=prerouting comment=GG new-routing-mark=ISP1 packet-mark=Games \
     passthrough=yes
-add action=mark-connection chain=prerouting comment=********** connection-mark=no-mark \
+add action=mark-connection chain=input comment=********** connection-mark=no-mark \
     connection-state=new in-interface=ether1_ISP1 new-connection-mark=ISP1_conn passthrough=\
     yes
-add action=mark-connection chain=prerouting connection-mark=no-mark connection-state=new \
+add action=mark-connection chain=input connection-mark=no-mark connection-state=new \
     in-interface=ether2_ISP2 new-connection-mark=ISP2_conn passthrough=yes
 add action=mark-routing chain=output comment=********** connection-mark=ISP1_conn \
     new-routing-mark=ISP1 passthrough=yes

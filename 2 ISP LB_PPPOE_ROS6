@@ -1,16 +1,56 @@
+Pls Donate: GCASH 09071973112 (Fr***** A.) BADLY NEEDED KO PANG KAPE AT pang bili OLT 
 
 
+SHOUT SA MGA NAG DONATE>
+  MAR***   ABA*****
+  REV***   DAN*****
+  MIC***   BAL*****
+  A** ***  NAM****
+  RO***    INC***** 
+  JOS***   SAM*****
+  JAY***   ORT*****
+  JAN***   MAG*****
+  plus 4 Anonimous person
 
 
+Wag nyo po ibenta ang script ko. Ma-agang pamasko po, at caroling ko na din po sainyo.
+MARAMING SALAMAT SA LAHAT NG MEMBERS NG GROUP< ADMIN< MODS AT MGA SHARER. 
+
+DISCLAIMER: May mga pupuna po sa config ko, yun mas may alam at expert, Sensya na master.. 
+Ito po para sa mga gusto matuto, nag sisimula pa lang. Sharing is caring. 
+KUNG MAY MALI PO SA SETUP KO, WAG NYO PO I POST at ibash ako. PM ME PARA MA AYUS KO. 
+LASTLY, sa mga gagamit, i custom nyo n lang depende sa set up nyo. 
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+DISCRIPTION:
+
+HEX ROS v 6.48
 
 
+ETHER1	ISP1 = 192.168.1.1
+ETHER2	ISP2 = 192.168.2.1
+ETHER3	PPPOE
+ETHER4  PPPOE
+ETHER5	LAN = 192.168.21.1
 
 
+LOADBALANCE:
+    All indicated game ports will go to ISP2 for lower ping.
+    incase you need to change game for to ISP 1 ++++++++++++++ ip/firewall/mangle change routing mark from ISP2 to ISP1.
 
 
+    lahat ng browsing, video streaming at other connections ay pupunta sa Loadbalancing all ISP1,2. 
+    MAg tutulong tulong ang 2 ISP na sa other connection. 
+    naka set ang ISP1 sa 3/0 at 3/1, samantalang ang isp 2 3/2.
 
+FAILOVER: 
+naka set sa DNS recursive routing ang lahat ng ISP kaya wala ng ibang gagalawin
+naka set na mag failover and ISP2(GAMES) papunta sa isp1 at isp3 incase na mag down ang ISP2. 
+lahat ay automatic
 
-
+NETWATCH : ARP ONLY: when one isp is off, will failover to next ISP. 
+(NO DNS PING BEyond ANy isp. Currently unsupported with my ROS version.)
+________________________________________________________
 
 
   MMM      MMM       KKK                          TTTTTTTTTTT      KKK

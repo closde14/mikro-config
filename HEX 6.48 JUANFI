@@ -1,7 +1,34 @@
+Pls Donate: GCASH 09071973112 (Fr***** A.) BADLY NEEDED KO PANG KAPE at pang bili ONT
+
+SHOUT SA MGA NAG DONATE>
+  MAR***   ABA*****
+  REV***   DAN*****
+  MIC***   BAL*****
+  A** ***  NAM****
+  RO***    INC***** 
+  JOS***   SAM*****
+  JAY***   ORT*****
+  JAN***   MAG*****
+  GER***   MAN*****
+  JHA***   BAN*****
+  plus 4 Anonimous person
+  	
+Wag nyo po ibenta ang script ko. Ma-agang pamasko po, at caroling ko na din po sainyo.
+MARAMING SALAMAT SA LAHAT NG MEMBERS NG GROUP< ADMIN< MODS AT MGA SHARER. 
+
+DISCLAIMER: May mga pupuna po sa config ko, yun mas may alam at expert, Sensya na master.. 
+Ito po para sa mga gusto matuto, nag sisimula pa lang. Sharing is caring. 
+KUNG MAY MALI PO SA SETUP KO, WAG NYO PO I POST at ibash ako. PM ME PARA MA AYUS KO. 
+LASTLY, sa mga gagamit, i custom nyo n lang depende sa set up nyo. 
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
 DESCRIPTION
 
 HEX v 6.48
 JUANFI CONFIG 
+KAYO NA MAG PROVIDE NG PORTAL. 
 1 ISP
 
 ether 1 ISP
@@ -9,9 +36,12 @@ ether 2 LAN 192.168.88.1
 ether 3,4,5 AP. 10.0.0.1
 
 with bandwidth management
-same doubious ML port as anti lag. 
+same "doubious" ML port as anti lag. 
 pc and q tree
 mangle 
+
+KAYO NA MAG ADD NG GAME PORTS PARA SA GAMES, TINAMAD NA AKO MAG LAGAY. "KADUDA-DUDA" ANG ML PORTS KO. 
+
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -24,23 +54,16 @@ mangle
 
   MikroTik RouterOS 6.48.6 (c) 1999-2021       http://www.mikrotik.com/
 
-[?]             Gives the list of available commands
-command [?]     Gives help on the command and list of arguments
 
-[Tab]           Completes the command/word. If the input is ambiguous,
-                a second [Tab] gives possible options
-
-/               Move up to base level
-..              Move up one level
-/command        Use command at the base level
-[admin@RouterOS] > ex
-bad command name ex (line 1 column 1)
 [admin@RouterOS] > export 
 # jan/02/1970 00:36:54 by RouterOS 6.48.6
 # software id = 8SM5-JSRR
 #
 # model = RB750Gr3
 # serial number = HE908MEW7R7
+
+
+
 /interface bridge
 add name=bridge1-LAN
 add name=bridge2-Juanfi

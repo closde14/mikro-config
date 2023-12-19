@@ -1,0 +1,277 @@
+Pls Donate: GCASH 09071973112 (Fr***** A.) BADLY NEEDED KO PANG KAPE at pang bili ONT
+
+SHOUT SA MGA NAG DONATE>
+  MAR***   ABA*****
+  REV***   DAN*****
+  MIC***   BAL*****
+  A** ***  NAM****
+  RO***    INC***** 
+  JOS***   SAM*****
+  JAY***   ORT*****
+  JAN***   MAG*****
+  GER***   MAN*****
+  plus 4 Anonimous person
+  	
+Wag nyo po ibenta ang script ko. Ma-agang pamasko po, at caroling ko na din po sainyo.
+MARAMING SALAMAT SA LAHAT NG MEMBERS NG GROUP< ADMIN< MODS AT MGA SHARER. 
+
+DISCLAIMER: May mga pupuna po sa config ko, yun mas may alam at expert, Sensya na master.. 
+Ito po para sa mga gusto matuto, nag sisimula pa lang. Sharing is caring. 
+KUNG MAY MALI PO SA SETUP KO, WAG NYO PO I POST at ibash ako. PM ME PARA MA AYUS KO. 
+LASTLY, sa mga gagamit, i custom nyo n lang depende sa set up nyo. 
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+DISCRIPTION:
+
+
+RB4011 
+ROS 7.8
+
+ETHER1	ISP1 = 192.168.254.254/24
+ETHER2	ISP2 = 192.168.1.1/24
+ETHER3  ISP3 = 192.168.2.1/24
+ETHER4	LAN = 
+ETHER5  LAN = 192.168.11.1/24
+ETHER6	LAN =
+ETHER7  PPPOE = 172.54.0.0/24
+ETHER8  MINI-PC = 192.168.12.1/24
+ETHER9  ACCESS POINT
+ETHER10  ACCESS POINT
+
+LOADBALANCE:
+    PCC LOAD BALANCING
+    HIGH PERFORMACE LOADBALANCING. TESTED AND PROVEN. 
+    MANGLE = ISP1 IS SET TO GAMING PORT PRIORITY
+
+            [add action=mark-routing chain=prerouting comment=\
+            "CHANGE THIS ROUTING MARK TO ANY ISP , to proiritize Games to said ISP" \
+            new-routing-mark=ISP1 packet-mark=Gaming passthrough=no]
+
+FAILOVER: 
+    TESTED AND PROVEDN HIGLY EFFECTIVE SEAMLESS FAILOVER.
+    RECURSIVE ROUTING VIA DNS
+    [NEVER SET DNS IP ADDRESS BE THE SAME AS THOSE DNS IN YOUR RECURSIVE ROUTING, IT WILL MESS UP RECURSIVE ROUTING FAILOVER]
+
+
+
+
+
+
+
+
+  MMM      MMM       KKK                          TTTTTTTTTTT      KKK
+  MMMM    MMMM       KKK                          TTTTTTTTTTT      KKK
+  MMM MMMM MMM  III  KKK  KKK  RRRRRR     OOOOOO      TTT     III  KKK  KKK
+  MMM  MM  MMM  III  KKKKK     RRR  RRR  OOO  OOO     TTT     III  KKKKK
+  MMM      MMM  III  KKK KKK   RRRRRR    OOO  OOO     TTT     III  KKK KKK
+  MMM      MMM  III  KKK  KKK  RRR  RRR   OOOOOO      TTT     III  KKK  KKK
+
+  MikroTik RouterOS 7.8 (c) 1999-2023       https://www.mikrotik.com/
+
+Press F1 for help
+
+
+
+[admin@MikroTik] > export 
+# dec/13/2023 20:18:48 by RouterOS 7.8
+# software id = N3BF-1Z37
+#
+# model = RB4011iGS+
+# serial number = HD80866S87A
+/interface bridge
+add name=LAN
+add name=PPPOE
+add ingress-filtering=no name=VLAN vlan-filtering=yes
+/interface ethernet
+set [ find default-name=ether1 ] name=ether1_ISP1
+set [ find default-name=ether2 ] name=ether2_ISP2
+set [ find default-name=ether3 ] name=ether3_ISP3
+set [ find default-name=ether4 ] name=ether4_LAN
+set [ find default-name=ether5 ] name=ether5_LAN
+set [ find default-name=ether6 ] name=ether6_LAN
+set [ find default-name=ether7 ] name=ether7_PPPOE
+set [ find default-name=ether8 ] name=ether8_MINIPC
+set [ find default-name=ether9 ] name=ether9_AP
+set [ find default-name=ether10 ] name=ether10_AP
+/interface list
+add name=WAN
+add name=LOCAL
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip pool
+add name=dhcp_pool0 ranges=192.168.11.2-192.168.11.254
+add name=dhcp_pool1 ranges=192.168.12.2-192.168.12.254
+add name=PPPOE ranges=172.54.0.10-172.54.0.254
+/ip dhcp-server
+add address-pool=dhcp_pool0 interface=LAN name=dhcp1
+add address-pool=dhcp_pool1 interface=VLAN name=dhcp2
+/port
+set 0 name=serial0
+set 1 name=serial1
+/queue type
+add kind=fq-codel name=FQ-Codel
+/ppp profile
+add comment="JUST Copy then edit limits to add profiles" dns-server=\
+    8.8.8.8,8.8.4.4 local-address=172.54.0.1 name=20M queue-type=FQ-Codel \
+    rate-limit=20M/20M remote-address=PPPOE
+/routing table
+add disabled=no fib name=ISP1
+add disabled=no fib name=ISP2
+add disabled=no fib name=ISP3
+/interface bridge port
+add bridge=LAN interface=ether5_LAN
+add bridge=LAN interface=ether6_LAN
+add bridge=LAN interface=ether4_LAN
+add bridge=PPPOE interface=ether7_PPPOE
+add bridge=VLAN interface=ether8_MINIPC
+add bridge=VLAN interface=ether9_AP pvid=22
+add bridge=VLAN interface=ether10_AP pvid=22
+/interface bridge vlan
+add bridge=PPPOE tagged=ether8_MINIPC untagged=ether9_AP,ether10_AP vlan-ids=22
+/interface list member
+add interface=ether1_ISP1 list=WAN
+add interface=ether2_ISP2 list=WAN
+add interface=ether3_ISP3 list=WAN
+add interface=ether6_LAN list=LOCAL
+add interface=ether7_PPPOE list=LOCAL
+add interface=ether8_MINIPC list=LOCAL
+add interface=ether5_LAN list=LOCAL
+add interface=ether9_AP list=LOCAL
+add interface=ether10_AP list=LOCAL
+add interface=ether4_LAN list=LOCAL
+/interface pppoe-server server
+add authentication=pap default-profile=20M disabled=no interface=PPPOE \
+    max-sessions=1 one-session-per-host=yes service-name=PPPOE
+/ip address
+add address=192.168.11.1/24 interface=LAN network=192.168.11.0
+add address=192.168.12.1/24 interface=VLAN network=192.168.12.0
+add address=172.54.0.1/24 interface=PPPOE network=172.54.0.0
+/ip dhcp-client
+add add-default-route=no interface=ether1_ISP1
+add add-default-route=no interface=ether2_ISP2
+add add-default-route=no interface=ether3_ISP3
+/ip dhcp-server network
+add address=192.168.11.0/24 dns-server=8.8.8.8,8.8.4.4 gateway=192.168.11.1
+add address=192.168.12.0/24 dns-server=8.8.8.8,8.8.4.4 gateway=192.168.12.1
+/ip dns
+set servers=8.8.8.8,8.8.4.4
+/ip firewall address-list
+add address=192.168.11.0/24 list=LAN
+add address=192.168.12.0/24 list=LAN
+add address=172.54.0.0/24 list=LAN
+add address=192.168.254.0/24 list=WAN
+add address=192.168.1.0/24 list=WAN
+add address=192.168.2.0/24 list=WAN
+/ip firewall mangle
+add action=accept chain=prerouting dst-address-list=LAN
+add action=accept chain=prerouting dst-address-list=WAN
+add action=accept chain=prerouting
+add action=mark-connection chain=prerouting comment=ML dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 \
+    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 \
+    new-connection-mark=GAMING_conn passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting comment=COD dst-port=\
+    10004-20999,7086-7995,41182-41192 new-connection-mark=GAMING_conn \
+    passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting dst-port=\
+    10004-20999,7086-7995,41182-41192 new-connection-mark=GAMING_conn \
+    passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting comment=PUBG dst-port=\
+    3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=\
+    GAMING_conn passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting dst-port=\
+    3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=\
+    GAMING_conn passthrough=yes protocol=tcp
+add action=mark-packet chain=prerouting connection-mark=GAMING_conn \
+    new-packet-mark=Gaming passthrough=no
+add action=mark-routing chain=prerouting comment=\
+    "CHANGE THIS ROUTING MARK TO ANY ISP , to proiritize Games to said ISP" \
+    new-routing-mark=ISP1 packet-mark=Gaming passthrough=no
+add action=mark-connection chain=prerouting comment=\
+    "LOAD Balancing mangle starts here" connection-mark=no-mark \
+    connection-state=new in-interface=ether3_ISP3 new-connection-mark=ISP3_conn \
+    passthrough=yes
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new in-interface=ether2_ISP2 new-connection-mark=ISP2_conn \
+    passthrough=yes
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new in-interface=ether1_ISP1 new-connection-mark=ISP1_conn \
+    passthrough=yes
+add action=mark-routing chain=output comment=OUT connection-mark=ISP1_conn \
+    new-routing-mark=ISP1 passthrough=yes
+add action=mark-routing chain=output connection-mark=ISP3_conn \
+    new-routing-mark=ISP3 passthrough=yes
+add action=mark-routing chain=output connection-mark=ISP2_conn \
+    new-routing-mark=ISP2 passthrough=yes
+add action=mark-connection chain=prerouting comment=PCC connection-mark=no-mark \
+    connection-state=new dst-address-type=!local new-connection-mark=ISP1_conn \
+    passthrough=yes per-connection-classifier=both-addresses-and-ports:4/0 \
+    src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new dst-address-type=!local new-connection-mark=ISP1_conn \
+    passthrough=yes per-connection-classifier=both-addresses-and-ports:4/1 \
+    src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new dst-address-type=!local new-connection-mark=ISP3_conn \
+    passthrough=yes per-connection-classifier=both-addresses-and-ports:4/2 \
+    src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new dst-address-type=!local new-connection-mark=ISP2_conn \
+    passthrough=yes per-connection-classifier=both-addresses-and-ports:4/3 \
+    src-address-list=LAN
+add action=mark-routing chain=prerouting comment=Routing connection-mark=\
+    ISP1_conn new-routing-mark=ISP1 passthrough=yes src-address-list=LAN
+add action=mark-routing chain=prerouting connection-mark=ISP3_conn \
+    new-routing-mark=ISP3 passthrough=yes src-address-list=LAN
+add action=mark-routing chain=prerouting connection-mark=ISP2_conn \
+    new-routing-mark=ISP2 passthrough=yes src-address-list=LAN
+/ip firewall nat
+add action=masquerade chain=srcnat out-interface=ether1_ISP1
+add action=masquerade chain=srcnat out-interface=ether2_ISP2
+add action=masquerade chain=srcnat out-interface=ether3_ISP3
+/ip route
+add check-gateway=ping comment=ISP1 disabled=no distance=1 dst-address=\
+    0.0.0.0/0 gateway=192.168.254.254 pref-src="" routing-table=main scope=30 \
+    suppress-hw-offload=no target-scope=10
+add check-gateway=ping comment=ISP3 disabled=no distance=1 dst-address=\
+    0.0.0.0/0 gateway=192.168.2.1 pref-src="" routing-table=main scope=30 \
+    suppress-hw-offload=no target-scope=10
+add check-gateway=ping comment=ISP2 disabled=no distance=1 dst-address=\
+    0.0.0.0/0 gateway=192.168.1.1 pref-src="" routing-table=main scope=30 \
+    suppress-hw-offload=no target-scope=10
+add check-gateway=ping comment=ISP2 disabled=no distance=2 dst-address=\
+    0.0.0.0/0 gateway=192.168.1.1 pref-src="" routing-table=ISP2 scope=30 \
+    suppress-hw-offload=no target-scope=10
+add check-gateway=ping comment=ISP3 disabled=no distance=3 dst-address=\
+    0.0.0.0/0 gateway=192.168.2.1 pref-src="" routing-table=ISP3 scope=30 \
+    suppress-hw-offload=no target-scope=10
+add check-gateway=ping comment=ISP1 disabled=no distance=1 dst-address=\
+    0.0.0.0/0 gateway=192.168.254.254 pref-src="" routing-table=ISP1 scope=30 \
+    suppress-hw-offload=no target-scope=10
+add comment=DNS1 disabled=no distance=1 dst-address=1.1.1.1/32 gateway=\
+    192.168.254.254 pref-src="" routing-table=main scope=10 \
+    suppress-hw-offload=no target-scope=10
+add comment=DNS2 disabled=no distance=1 dst-address=1.0.0.1/32 gateway=\
+    192.168.1.1 pref-src="" routing-table=main scope=10 suppress-hw-offload=no \
+    target-scope=10
+add comment=DNS3 disabled=no distance=1 dst-address=9.9.9.9/32 gateway=\
+    192.168.2.1 pref-src="" routing-table=main scope=10 suppress-hw-offload=no \
+    target-scope=10
+add check-gateway=ping disabled=no distance=2 dst-address=0.0.0.0/0 gateway=\
+    1.0.0.1 pref-src="" routing-table=main scope=30 suppress-hw-offload=no \
+    target-scope=15
+add check-gateway=ping disabled=no distance=3 dst-address=0.0.0.0/0 gateway=\
+    9.9.9.9 pref-src="" routing-table=main scope=30 suppress-hw-offload=no \
+    target-scope=15
+add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=\
+    1.1.1.1 pref-src="" routing-table=main scope=30 suppress-hw-offload=no \
+    target-scope=15
+/ppp secret
+add comment="password: 1234" name=client1 profile=20M service=pppoe
+/system clock
+set time-zone-name=Asia/Manila
+[admin@MikroTik] > 

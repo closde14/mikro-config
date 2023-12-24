@@ -45,8 +45,10 @@ ML___COD______PUBG
 BROWSING AND STREAMING
 
 
-1.  ____________add to mangle___________copy paste to ne terminal
 
+1.  ____________add to mangle___________copy paste to ne terminal
+GAMING UPLOAD>>>> CURRENTLY USELESS>>> NEED EDIT
+BROWSING UPLOAD >>>>> CURRENTLY USELESS >>>> NEED EDIT
 
 /ip firewall mangle
 add action=mark-connection chain=prerouting comment=ML dst-port=\
@@ -82,6 +84,7 @@ add action=mark-packet chain=forward dst-address-list=LAN new-packet-mark=\
 
 
 2.  ____________edit and add your LAN IP BLOCK_______copy paste to new terminal
+CHANGE TO YOUR OWN NETWORK>>> NO NEED TO COPY MY IP ADD
 
 /ip firewall address-list
 add address=192.168.4.0/24 list=LAN
@@ -122,6 +125,8 @@ add limit-at=5M/5M max-limit=25M/25M name=BROWSE/STREAM packet-marks=\
     BROWSING_DL,BROWSING_UP parent=LAN priority=1/1 queue=FQCODEL/FQCODEL target=\
     "" total-queue=FQCODEL
 
+
+NOT WORKING CURRENTLY>>>> 
 
 
 or 3.2  ____________________PPPOE AND HOTSPOT____________________ COPY AND PASTE ON "ONLOG ON SCRIPT" IN THE hs OR ppp PROFILES

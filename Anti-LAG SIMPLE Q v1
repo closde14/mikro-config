@@ -31,20 +31,21 @@ APPLICABLE FOR THE FF:
 
 CONTENTS:
 
-MANGLE
-ADDRESS LIST
-ROS6 AND ROS7 COMPATIBLE
-RO7 ONLY COMPATIBLE
-HOTSPOT PROFILE SCRIPT ON LOGON
-PPPOE PROFILE SCRIPT ON LOGON
+1  MANGLE
+2  ADDRESS LIST
+3  ROS6 AND ROS7 COMPATIBLE
 
+3.1  RO7 ONLY COMPATIBLE
+3.2  HOTSPOT PROFILE SCRIPT ON LOGON
+3.2  PPPOE PROFILE SCRIPT ON LOGON
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ML___COD______PUBG
 BROWSING AND STREAMING
 
 
-____________add to mangle___________copy paste to ne terminal
-
+1.  ____________add to mangle___________copy paste to ne terminal
 
 
 /ip firewall mangle
@@ -80,29 +81,34 @@ add action=mark-packet chain=forward dst-address-list=LAN new-packet-mark=\
     BROWSING_UP passthrough=no
 
 
-____________edit and add your LAN IP BLOCK_______copy paste to new terminal
-
+2.  ____________edit and add your LAN IP BLOCK_______copy paste to new terminal
 
 /ip firewall address-list
 add address=192.168.4.0/24 list=LAN
 add address=192.168.30.0/24 list=LAN
 
 
-____________ROS6 and RO7___________copy paste to new terminal
+3.  ____________ROS6 and RO7___________copy paste to new terminal
 ____________EDIT LIMITS TO your preferences.__________________________
+30MBPS TOTAL  
+25MBPS FOR BROWS AND STREAM
+5MBPS FOR GAMES
 
 
 /queue simple
 add limit-at=30M/30M max-limit=30M/30M name=LAN target=192.168.30.0/24
 add limit-at=5M/5M max-limit=5M/5M name=GAMES packet-marks=Gaming_DL,Gaming_UP \
     parent=LAN priority=1/1 target=""
-add limit-at=5M/5M max-limit=5M/5M name=BROWSE/STREAM packet-marks=\
+add limit-at=5M/5M max-limit=25M/25M name=BROWSE/STREAM packet-marks=\
     BROWSING_DL,BROWSING_UP parent=LAN priority=1/1 target=""
 
 
 
-____________ RO7 ONLY__________copy paste to new terminal
+3.1____________ RO7 ONLY__________copy paste to new terminal
 ____________EDIT LIMITS TO your preferences.__________________________
+30MBPS TOTAL  
+25MBPS FOR BROWS AND STREAM
+5MBPS FOR GAMES
 
 
 /queue type
@@ -112,19 +118,25 @@ add limit-at=30M/30M max-limit=30M/30M name=LAN queue=FQCODEL/FQCODEL target=\
     192.168.30.0/24 total-queue=FQCODEL
 add limit-at=5M/5M max-limit=5M/5M name=GAMES packet-marks=Gaming_DL,Gaming_UP \
     parent=LAN priority=1/1 queue=FQCODEL/FQCODEL target="" total-queue=FQCODEL
-add limit-at=5M/5M max-limit=5M/5M name=BROWSE/STREAM packet-marks=\
+add limit-at=5M/5M max-limit=25M/25M name=BROWSE/STREAM packet-marks=\
     BROWSING_DL,BROWSING_UP parent=LAN priority=1/1 queue=FQCODEL/FQCODEL target=\
     "" total-queue=FQCODEL
 
 
 
-____________________PPPOE AND HOTSPOT____________________ COPY AND PASTE ON "ONLOG ON SCRIPT" IN THE hs OR ppp PROFILES
+or 3.2  ____________________PPPOE AND HOTSPOT____________________ COPY AND PASTE ON "ONLOG ON SCRIPT" IN THE hs OR ppp PROFILES
+30MBPS TOTAL  
+25MBPS FOR BROWS AND STREAM
+5MBPS FOR GAMES
+
+
 add limit-at=30M/30M max-limit=30M/30M name="$user" target="$remote-address"
 add limit-at=5M/5M max-limit=5M/5M name=GAMES packet-marks=Gaming_DL,Gaming_UP \
     parent="$user" priority=1/1 target=""
-add limit-at=5M/5M max-limit=5M/5M name=BROWSE/STREAM packet-marks=\
+add limit-at=5M/5M max-limit=25M/25M name=BROWSE/STREAM packet-marks=\
     BROWSING_DL,BROWSING_UP parent="$user" priority=1/1 target=""
 
-____________copy paste on "on log-out" profile script_________________________
+3.2  ____________copy paste on "on log-out" profile script_________________________
+
 /queue simple
 remove name="$user"

@@ -1,0 +1,130 @@
+Pls Donate: GCASH 09071973112 (Fr***** A.) BADLY NEEDED KO PANG KAPE
+
+
+Wag nyo po ibenta ang script ko. Ma-agang pamasko po, at caroling ko na din po sainyo.
+MARAMING SALAMAT SA LAHAT NG MEMBERS NG GROUP< ADMIN< MODS AT MGA SHARER. 
+
+DISCLAIMER: May mga pupuna po sa config ko, yun mas may alam at expert, Sensya na master.. 
+Ito po para sa mga gusto matuto, nag sisimula pa lang. Sharing is caring. 
+KUNG MAY MALI PO SA SETUP KO, WAG NYO PO I POST at ibash ako. PM ME PARA MA AYUS KO. 
+LASTLY, sa mga gagamit, i custom nyo n lang depende sa set up nyo. 
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+DESCRIPTION :
+
+_______________ EFFECTIVENESS IS NOT GUARANTEED _____________
+_______________ READ EVERY SECTION CAREFULLY_____________
+
+************* NOT QUEUE TREE ***************
+
+************ SIMPLE QUEUE ONLY ******************
+
+
+APPLICABLE FOR THE FF:
+  SINGLE AND MULTIPLE ISP
+  LAN BRIDGE
+  HOTSPOT BRIDGE
+  PPPOE BRIDGE
+  PISOWIFI BOTH VLAN and TRADITIONAL
+
+CONTENTS:
+
+MANGLE
+ADDRESS LIST
+ROS6 AND ROS7 COMPATIBLE
+RO7 ONLY COMPATIBLE
+HOTSPOT PROFILE SCRIPT ON LOGON
+PPPOE PROFILE SCRIPT ON LOGON
+
+
+ML___COD______PUBG
+BROWSING AND STREAMING
+
+
+____________add to mangle___________copy paste to ne terminal
+
+
+
+/ip firewall mangle
+add action=mark-connection chain=prerouting comment=ML dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-connection-mark=\
+    GAMING_conn passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-connection-mark=\
+    GAMING_conn passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting comment=COD dst-port=\
+    10004-20999,7086-7995,41182-41192 new-connection-mark=GAMING_conn \
+    passthrough=yes protocol=tcp
+add action=mark-connection chain=prerouting dst-port=\
+    10004-20999,7086-7995,41182-41192 new-connection-mark=GAMING_conn \
+    passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting comment=PUBG dst-port=\
+    3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=\
+    GAMING_conn passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting dst-port=\
+    3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=\
+    GAMING_conn passthrough=yes protocol=tcp
+add action=mark-packet chain=forward new-packet-mark=Gaming_DL \
+    out-interface-list=WAN passthrough=no
+add action=mark-packet chain=forward dst-address-list=LAN new-packet-mark=\
+    Gaming_UP passthrough=no
+add action=mark-connection chain=prerouting comment=ALL dst-port=443,8080,80 \
+    new-connection-mark=BROWSING_conn passthrough=yes protocol=udp
+add action=mark-connection chain=prerouting comment=ALL dst-port=443,8080,80 \
+    new-connection-mark=BROWSING_conn passthrough=yes protocol=tcp
+add action=mark-packet chain=forward new-packet-mark=BROWSING_DL \
+    out-interface-list=WAN passthrough=no
+add action=mark-packet chain=forward dst-address-list=LAN new-packet-mark=\
+    BROWSING_UP passthrough=no
+
+
+____________edit and add your LAN IP BLOCK_______copy paste to new terminal
+
+
+/ip firewall address-list
+add address=192.168.4.0/24 list=LAN
+add address=192.168.30.0/24 list=LAN
+
+
+____________ROS6 and RO7___________copy paste to new terminal
+____________EDIT LIMITS TO your preferences.__________________________
+
+
+/queue simple
+add limit-at=30M/30M max-limit=30M/30M name=LAN target=192.168.30.0/24
+add limit-at=5M/5M max-limit=5M/5M name=GAMES packet-marks=Gaming_DL,Gaming_UP \
+    parent=LAN priority=1/1 target=""
+add limit-at=5M/5M max-limit=5M/5M name=BROWSE/STREAM packet-marks=\
+    BROWSING_DL,BROWSING_UP parent=LAN priority=1/1 target=""
+
+
+
+____________ RO7 ONLY__________copy paste to new terminal
+____________EDIT LIMITS TO your preferences.__________________________
+
+
+/queue type
+add kind=fq-codel name=FQCODEL
+/queue simple
+add limit-at=30M/30M max-limit=30M/30M name=LAN queue=FQCODEL/FQCODEL target=\
+    192.168.30.0/24 total-queue=FQCODEL
+add limit-at=5M/5M max-limit=5M/5M name=GAMES packet-marks=Gaming_DL,Gaming_UP \
+    parent=LAN priority=1/1 queue=FQCODEL/FQCODEL target="" total-queue=FQCODEL
+add limit-at=5M/5M max-limit=5M/5M name=BROWSE/STREAM packet-marks=\
+    BROWSING_DL,BROWSING_UP parent=LAN priority=1/1 queue=FQCODEL/FQCODEL target=\
+    "" total-queue=FQCODEL
+
+
+
+____________________PPPOE AND HOTSPOT____________________ COPY AND PASTE ON "ONLOG ON SCRIPT" IN THE hs OR ppp PROFILES
+add limit-at=30M/30M max-limit=30M/30M name="$user" target="$remote-address"
+add limit-at=5M/5M max-limit=5M/5M name=GAMES packet-marks=Gaming_DL,Gaming_UP \
+    parent="$user" priority=1/1 target=""
+add limit-at=5M/5M max-limit=5M/5M name=BROWSE/STREAM packet-marks=\
+    BROWSING_DL,BROWSING_UP parent="$user" priority=1/1 target=""
+
+____________copy paste on "on log-out" profile script_________________________
+/queue simple
+remove name="$user"

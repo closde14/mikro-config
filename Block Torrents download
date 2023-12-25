@@ -1,0 +1,54 @@
+block torrents in mikrotik routers
+
+layer 7 
+
+credits to Chasster Tumando Panuncillon on juanfi fb group
+
+___________________________________________________________________________________________
+
+/ip firewall layer7-protocol
+add comment="P2P WWW web base content Matching / umar" name=p2p_www regexp="^.*(get|GET).+(torrent|thepiratebay|yts|1337x|NYAA|fitgirl|skidrowreloaded|igg|eztv|torrentgala\
+    xy|limetorrents|pirateproxy|torrentz2|limetor|torrends|torrentdownloads|iptorrents|torrentfunk2|gtdb|glodls|rutracker|solidtorrents|bitport|dirtytorrents|idope|yourbit\
+    torrent2|anidex|publicdomaintorrents|isohunt|entertane|demonoid|btjunkie|mininova|flixflux|vertor|h33t|zoozle|bitnova|bitsoup|meganova|fulldls|btbot|fenopy|gpirate|com\
+    monbits).*\$"
+add comment="P2P DNS Matching / umar" name=p2p_dns regexp="^.+(torrent|thepiratebay|isohunt|yts|1337x|NYAA|fitgirl|skidrowreloaded|igg|eztv|torrentgalaxy|limetorrents|pira\
+    teproxy|torrentz2|limetor|torrends|torrentdownloads|iptorrents|torrentfunk2|gtdb|glodls|rutracker|solidtorrents|bitport|dirtytorrents|idope|yourbittorrent2|anidex|publ\
+    icdomaintorrents|entertane|demonoid|btjunkie|mininova|flixflux|vertor|h33t|zoozle|bitnova|bitsoup|meganova|fulldls|btbot|fenopy|gpirate|commonbits).*\$"
+add comment="Mikrotik Block Torrent" name=layer7-bittorrent-expp regexp=\
+    "^(\\x13bittorrent protocol|azver\\x01\$|get /scrape\\\?info_hash=get /announce\\\?info_hash=|get /client/bitcomet/|GET /data\\\?fid=)|d1:ad2:id20:|\\x08'7P\\)[RP]"
+
+
+/ip firewall filter
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" disabled=yes
+add action=add-src-to-address-list address-list=Torrent-Conn address-list-timeout=2m chain=forward layer7-protocol=*3 src-address=192.168.7.0/24 src-address-list=\
+    !allow-bit
+add action=drop chain=forward dst-port=!0-1024,8291,5900,5800,3389,14147,5222,59905 protocol=tcp src-address-list=Torrent-Conn
+add action=drop chain=forward dst-port=!0-1024,8291,5900,5800,3389,14147,5222,59905 protocol=udp src-address-list=Torrent-Conn
+add action=add-src-to-address-list address-list=Torrent-Conn address-list-timeout=2m chain=forward layer7-protocol=*3 src-address=192.168.7.0/24 src-address-list=\
+    !allow-bit
+add action=drop chain=forward dst-port=!0-1024,8291,5900,5800,3389,14147,5222,59905 protocol=tcp src-address-list=Torrent-Conn
+add action=drop chain=forward dst-port=!0-1024,8291,5900,5800,3389,14147,5222,59905 protocol=udp src-address-list=Torrent-Conn,,,,,,,
+add action=drop chain=forward comment="TORRENT No 2: block outgoing DHT" content=d1:ad2:id20: dst-port=1025-65535 packet-size=95-190 protocol=udp
+add action=drop chain=forward comment="TORRENT No 3: block outgoing TCP announce" content="info_hash=" dst-port=2710,80 protocol=tcp
+add action=drop chain=forward comment="TORRENT No 4: prohibits download .torrent files. " content="\r\
+    \nContent-Type: application/x-bittorrent" protocol=tcp src-port=80
+add action=drop chain=forward comment="TORRENT No 5: 6771 block Local Broadcast" content="\r\
+    \nInfohash:" dst-port=6771 protocol=udp
+add action=add-src-to-address-list address-list=torrent-connections address-list-timeout=1w chain=forward-torrents-non-allowed-devices comment="Torrent Blocker" \
+    layer7-protocol=layer7-bittorrent-expp
+add action=add-src-to-address-list address-list=torrent-connections address-list-timeout=1w chain=forward-torrents-non-allowed-devices comment="Torrent Blocker" content=\
+    tracker
+add action=add-src-to-address-list address-list=torrent-connections address-list-timeout=1w chain=forward-torrents-non-allowed-devices comment="Torrent Blocker" content=\
+    info_hash
+add action=add-src-to-address-list address-list=torrent-connections address-list-timeout=1w chain=forward-torrents-non-allowed-devices comment="Torrent Blocker" content=\
+    annonce_peers
+add action=add-src-to-address-list address-list=torrent-connections address-list-timeout=1w chain=forward-torrents-non-allowed-devices comment="Torrent Blocker" content=\
+    getpeers
+add action=add-src-to-address-list address-list=torrent-connections address-list-timeout=1w chain=forward-torrents-non-allowed-devices comment="Torrent Blocker" content=\
+    torrent
+add action=return chain=forward-torrents-non-allowed-devices comment="Torrent Blocker"
+add action=drop chain=forward comment="Torrent Blocker" dst-port=!53,80,443,110,143,993,995,465,587,8080,8291,3389 protocol=tcp src-address-list=torrent-connections
+add action=drop chain=forward comment="Torrent Blocker" dst-port=!53,80,443,110,143,993,995,465,587,8080,8291,3389 protocol=udp src-address-list=torrent-connections
+/ip firewall mangle
+add action=mark-packet chain=postrouting comment="p2p download" layer7-protocol=p2p_www new-packet-mark="p2p download" passthrough=no
+add action=mark-packet chain=postrouting layer7-protocol=p2p_dns new-packet-mark="p2p download" passthrough=no

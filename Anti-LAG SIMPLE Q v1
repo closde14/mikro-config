@@ -130,8 +130,6 @@ add limit-at=5M/5M max-limit=25M/25M name=BROWSE/STREAM packet-marks=\
 
 
 
-
-
 NOT WORKING CURRENTLY>>>> 
 
 
@@ -140,12 +138,12 @@ or 3.2  ____________________PPPOE AND HOTSPOT____________________ COPY AND PASTE
 25MBPS FOR BROWS AND STREAM
 5MBPS FOR GAMES
 
-
-add limit-at=30M/30M max-limit=30M/30M name="$user" target="$remote-address"
-add limit-at=5M/5M max-limit=5M/5M name=GAMES packet-marks=Gaming_DL,Gaming_UP \
-    parent="$user" priority=1/1 target=""
-add limit-at=5M/5M max-limit=25M/25M name=BROWSE/STREAM packet-marks=\
-    BROWSING_DL,BROWSING_UP parent="$user" priority=1/1 target=""
+/queue simple
+add limit-at=35M/35M max-limit=35M/35M name="$user" target="$remote-address"
+add limit-at=5M/5M max-limit=5M/5M name=Games packet-marks=Gaming_DL,Gaming_UP \
+    parent=[find name="$user"] target=""
+add limit-at=10M/10M max-limit=30M/30M name=Browsing packet-marks=\
+    BROWSING_DL,BROWSING_UP parent= parent=[find name="$user"] target=""
 
 3.2  ____________copy paste on "on log-out" profile script_________________________
 

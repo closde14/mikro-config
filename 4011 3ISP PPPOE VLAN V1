@@ -168,29 +168,24 @@ add address=192.168.2.0/24 list=WAN
 add action=accept chain=prerouting dst-address-list=LAN
 add action=accept chain=prerouting dst-address-list=WAN
 add action=accept chain=prerouting
-add action=mark-connection chain=prerouting comment=ML dst-port=\
-    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting dst-port=\
-    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting comment=COD dst-port=\
-    10004-20999,7086-7995,41182-41192 new-connection-mark=GAMING_conn \
-    passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting dst-port=\
-    10004-20999,7086-7995,41182-41192 new-connection-mark=GAMING_conn \
-    passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting comment=PUBG dst-port=\
-    3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=\
-    GAMING_conn passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting dst-port=\
-    3013,50000,65010,65050,7085-7995,49152-65535 new-connection-mark=\
-    GAMING_conn passthrough=yes protocol=tcp
-add action=mark-packet chain=prerouting connection-mark=GAMING_conn \
-    new-packet-mark=Gaming passthrough=no
-add action=mark-routing chain=prerouting comment=\
-    "CHANGE THIS ROUTING MARK TO ANY ISP , to proiritize Games to said ISP" \
-    new-routing-mark=ISP1 packet-mark=Gaming passthrough=no
+dd action=mark-routing chain=prerouting comment=ML dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-routing-mark=\
+    ISP2 passthrough=no protocol=udp
+add action=mark-routing chain=prerouting dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-routing-mark=\
+    ISP2 passthrough=no protocol=tcp
+add action=mark-routing chain=prerouting comment="PUBG, CODM" dst-port="10004-2099\
+    9,7086-7995,41182-41192,3013,50000,65010,65050,7085-7995,49152-65535" \
+    new-routing-mark=ISP2 passthrough=no protocol=tcp
+add action=mark-routing chain=prerouting dst-port="10004-20999,7086-7995,41182-411\
+    92,3013,50000,65010,65050,7085-7995,49152-65535" new-routing-mark=ISP2 \
+    passthrough=no protocol=udp
+add action=mark-routing chain=prerouting comment=ROBLOX dst-port=\
+    3074,88,500,3070,3044,4500,49152-65535,53640 new-routing-mark=ISP2 \
+    passthrough=no protocol=udp
+add action=mark-routing chain=prerouting dst-port=\
+    3074,88,500,3070,3044,4500,49152-65535,53640 new-routing-mark=ISP2 \
+    passthrough=no protocol=tcp
 add action=mark-connection chain=prerouting comment=\
     "LOAD Balancing mangle starts here" connection-mark=no-mark \
     connection-state=new in-interface=ether3_ISP3 new-connection-mark=ISP3_conn \

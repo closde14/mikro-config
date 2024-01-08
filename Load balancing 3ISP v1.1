@@ -137,67 +137,28 @@ add address=192.168.4.2-192.168.4.254 list=LAN
 /ip firewall mangle
 add action=accept chain=prerouting dst-address=192.168.1.0/24
 add action=accept chain=prerouting dst-address=192.168.2.0/24
+add action=accept chain=prerouting dst-address=192.168.3.0/24
 add action=accept chain=prerouting dst-address=192.168.4.0/24
 add action=accept chain=prerouting dst-address=192.168.5.0/24
-add action=accept chain=prerouting dst-address=192.168.3.0/24
-add action=mark-connection chain=prerouting comment=ML dst-port=\
-    5000-5221,5224-5227,5229-5241,5243-5287,5289-5352,5354-5509,5517,5520-5529 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting dst-port=\
-    5000-5221,5224-5227,5229-5241,5243-5287,5289-5352,5354-5509,5517,5520-5529 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting dst-port=\
-    5551-5569,5601-5700,8443,9000-9010,9443,10003,30000-30900 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting dst-port=\
-    5551-5569,5601-5700,8443,9000-9010,9443,10003,30000-30900 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting dst-port=\
-    2702,3702,4001-4009,5000-5221,5224-5241,5243-5287,5289-5352,5354-5509 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting dst-port=\
-    2702,3702,4001-4009,5000-5221,5224-5241,5243-5287,5289-5352,5354-5509 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting dst-port=\
-    5507,5517-5529,5551-5569,5601-5700,8000-9010,9120,9992,10003,30000-30900 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting dst-port=\
-    5507,5517-5529,5551-5569,5601-5700,8000-9010,9120,9992,10003,30000-30900 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting comment=COD dst-port=\
-    7889,10012,13004,14000,17000,17500,18081,20000-20002,20371 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting dst-port=\
-    7889,10012,13004,14000,17000,17500,18081,20000-20002,20371 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting dst-port=\
-    8011,9030,10491,10612,12235,13004,13748,17000,17500,20000-20002 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting dst-port=\
-    8011,9030,10491,10612,12235,13004,13748,17000,17500,20000-20002 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting dst-port=\
-    7086-7995,10039,10096,11455,12070-12460,13894,13972,41182-41192 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting dst-port=\
-    7086-7995,10039,10096,11455,12070-12460,13894,13972,41182-41192 \
-    new-connection-mark=GAMING_conn passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting comment=PUBG dst-port=\
-    3013,10000-10019,18082,50000,65010,65050 new-connection-mark=GAMING_conn \
-    passthrough=yes protocol=udp
-add action=mark-connection chain=prerouting dst-port=\
-    3013,10000-10019,18082,50000,65010,65050 new-connection-mark=GAMING_conn \
-    passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting dst-port=\
-    7085-7995,8700,9030,10010-10019,17000-20100,49152-65535 new-connection-mark=\
-    GAMING_conn passthrough=yes protocol=tcp
-add action=mark-connection chain=prerouting dst-port=\
-    7085-7995,8700,9030,10010-10019,17000-20100,49152-65535 new-connection-mark=\
-    GAMING_conn passthrough=yes protocol=udp
-add action=mark-packet chain=prerouting connection-mark=GAMING_conn \
-    new-packet-mark=Gaming passthrough=yes
-add action=mark-routing chain=prerouting new-routing-mark=ISP2 packet-mark=Gaming \
-    passthrough=yes
+add action=accept chain=prerouting dst-address=192.168.30.0/24
+add action=mark-routing chain=prerouting comment=ML dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-routing-mark=\
+    ISP2 passthrough=no protocol=udp
+add action=mark-routing chain=prerouting dst-port=\
+    2702,3702,4001-4009,5000-5700,9443,8000-9992,30000-30900 new-routing-mark=\
+    ISP2 passthrough=no protocol=tcp
+add action=mark-routing chain=prerouting comment="PUBG, CODM" dst-port="10004-2099\
+    9,7086-7995,41182-41192,3013,50000,65010,65050,7085-7995,49152-65535" \
+    new-routing-mark=ISP2 passthrough=no protocol=tcp
+add action=mark-routing chain=prerouting dst-port="10004-20999,7086-7995,41182-411\
+    92,3013,50000,65010,65050,7085-7995,49152-65535" new-routing-mark=ISP2 \
+    passthrough=no protocol=udp
+add action=mark-routing chain=prerouting comment=ROBLOX dst-port=\
+    3074,88,500,3070,3044,4500,49152-65535,53640 new-routing-mark=ISP2 \
+    passthrough=no protocol=udp
+add action=mark-routing chain=prerouting dst-port=\
+    3074,88,500,3070,3044,4500,49152-65535,53640 new-routing-mark=ISP2 \
+    passthrough=no protocol=tcp
 add action=mark-connection chain=prerouting comment=\
     ++++++++++++++++++++++++++++++++++++++++ connection-mark=no-mark \
     connection-state=new in-interface=ether1_PLDT new-connection-mark=ISP1_conn \
@@ -210,32 +171,32 @@ add action=mark-connection chain=prerouting connection-mark=no-mark \
     passthrough=yes
 add action=mark-routing chain=output comment=OUT connection-mark=ISP1_conn \
     new-routing-mark=ISP1 passthrough=yes
-add action=mark-routing chain=output connection-mark=ISP3_conn new-routing-mark=\
-    ISP3 passthrough=yes
 add action=mark-routing chain=output connection-mark=ISP2_conn new-routing-mark=\
     ISP2 passthrough=yes
+add action=mark-routing chain=output connection-mark=ISP3_conn new-routing-mark=\
+    ISP3 passthrough=yes
 add action=mark-connection chain=prerouting comment=PCC connection-mark=no-mark \
     connection-state=new dst-address-type=!local new-connection-mark=ISP1_conn \
-    passthrough=yes per-connection-classifier=src-address-and-port:4/0 \
+    passthrough=yes per-connection-classifier=both-addresses-and-ports:4/0 \
     src-address-list=LAN
 add action=mark-connection chain=prerouting connection-mark=no-mark \
     connection-state=new dst-address-type=!local new-connection-mark=ISP1_conn \
-    passthrough=yes per-connection-classifier=src-address-and-port:4/1 \
-    src-address-list=LAN
-add action=mark-connection chain=prerouting connection-mark=no-mark \
-    connection-state=new dst-address-type=!local new-connection-mark=ISP3_conn \
-    passthrough=yes per-connection-classifier=src-address-and-port:4/2 \
+    passthrough=yes per-connection-classifier=both-addresses-and-ports:4/1 \
     src-address-list=LAN
 add action=mark-connection chain=prerouting connection-mark=no-mark \
     connection-state=new dst-address-type=!local new-connection-mark=ISP2_conn \
-    passthrough=yes per-connection-classifier=src-address-and-port:4/3 \
+    passthrough=yes per-connection-classifier=both-addresses-and-ports:4/2 \
+    src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark \
+    connection-state=new dst-address-type=!local new-connection-mark=ISP3_conn \
+    passthrough=yes per-connection-classifier=both-addresses-and-ports:4/3 \
     src-address-list=LAN
 add action=mark-routing chain=prerouting comment=Routing connection-mark=\
     ISP1_conn new-routing-mark=ISP1 passthrough=yes src-address-list=LAN
-add action=mark-routing chain=prerouting connection-mark=ISP3_conn \
-    new-routing-mark=ISP3 passthrough=yes src-address-list=LAN
 add action=mark-routing chain=prerouting connection-mark=ISP2_conn \
     new-routing-mark=ISP2 passthrough=yes src-address-list=LAN
+add action=mark-routing chain=prerouting connection-mark=ISP3_conn \
+    new-routing-mark=ISP3 passthrough=yes src-address-list=LAN
 /ip firewall nat
 add action=masquerade chain=srcnat out-interface=ether1_PLDT
 add action=masquerade chain=srcnat out-interface=ether2_Converge

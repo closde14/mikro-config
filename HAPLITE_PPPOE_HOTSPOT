@@ -1,0 +1,122 @@
+
+Pls Donate: GCASH 09071973112 (Fr***** A.) BADLY NEEDED KO PANG KAPE AT pang bili OLT 
+
+________________________________________________________________________________________
+
+
+ETHER 1 isp
+ETHER 2 LAN
+ETHER 3 4 WLAN pppoe/HOTSPOT
+  
+
+
+  MMM      MMM       KKK                          TTTTTTTTTTT      KKK
+  MMMM    MMMM       KKK                          TTTTTTTTTTT      KKK
+  MMM MMMM MMM  III  KKK  KKK  RRRRRR     OOOOOO      TTT     III  KKK  KKK
+  MMM  MM  MMM  III  KKKKK     RRR  RRR  OOO  OOO     TTT     III  KKKKK
+  MMM      MMM  III  KKK KKK   RRRRRR    OOO  OOO     TTT     III  KKK KKK
+  MMM      MMM  III  KKK  KKK  RRR  RRR   OOOOOO      TTT     III  KKK  KKK
+
+  MikroTik RouterOS 6.49.13 (c) 1999-2024       http://www.mikrotik.com/
+
+
+Do you want to see the software license? [Y/n]: n
+[?]             Gives the list of available commands
+command [?]     Gives help on the command and list of arguments
+
+[Tab]           Completes the command/word. If the input is ambiguous,
+                a second [Tab] gives possible options
+
+/               Move up to base level
+..              Move up one level
+/command        Use command at the base level
+[admin@MikroTik] > 
+[admin@MikroTik] > export
+# feb/25/2024 21:16:17 by RouterOS 6.49.13
+# software id = 2NIF-MGFI
+#
+# model = RouterBOARD 941-2nD
+# serial number = 66160541BB3E
+/interface wireless
+set [ find default-name=wlan1 ] country=philippines disabled=no mode=ap-bridge \
+    ssid=HOTSPOT
+/interface bridge
+add name=bridge1-lan
+add name=bridge2-pppoe_hotspot
+/interface ethernet
+set [ find default-name=ether1 ] comment=ISP name=ether1-ISP
+set [ find default-name=ether2 ] comment=LAN name=ether2-lan
+set [ find default-name=ether3 ] comment="PPPOE HOTSPOT"
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip hotspot profile
+add hotspot-address=10.0.0.1 http-cookie-lifetime=1d login-by=\
+    cookie,http-chap,http-pap,mac-cookie name=hsprof1
+/ip pool
+add name=hotspot ranges=10.0.0.2-10.0.0.254
+add name=PPPOE ranges=10.10.0.2-10.10.0.254
+add name=LAN ranges=192.168.88.2-192.168.88.254
+/ip dhcp-server
+add address-pool=LAN disabled=no interface=bridge1-lan name=dhcp1
+add address-pool=hotspot disabled=no interface=bridge2-pppoe_hotspot \
+    lease-time=1h name=dhcp2
+/ip hotspot
+add address-pool=hotspot addresses-per-mac=1 disabled=no interface=\
+    bridge2-pppoe_hotspot name=hotspot1 profile=hsprof1
+/queue simple
+add name=all target=""
+add name=hotspot parent=all target=10.0.0.0/24
+add name=ppp parent=all target=10.10.0.0/24
+/ip hotspot user profile
+set [ find default=yes ] mac-cookie-timeout=1d parent-queue=hotspot queue-type=\
+    default-small rate-limit=3M/3M
+/interface bridge port
+add bridge=bridge2-pppoe_hotspot interface=wlan1
+add bridge=bridge1-lan interface=ether2-lan
+add bridge=bridge2-pppoe_hotspot interface=ether3
+add bridge=bridge2-pppoe_hotspot interface=ether4
+/interface pppoe-server server
+add authentication=pap disabled=no interface=bridge2-pppoe_hotspot \
+    one-session-per-host=yes service-name=PPP
+/ip address
+add address=192.168.88.1/24 interface=bridge1-lan network=192.168.88.0
+add address=10.0.0.1/24 interface=bridge2-pppoe_hotspot network=10.0.0.0
+/ip dhcp-client
+add disabled=no interface=ether1-ISP
+/ip dhcp-server network
+add address=10.0.0.0/24 comment="hotspot network" gateway=10.0.0.1
+add address=192.168.88.0/24 dns-server=8.8.8.8,8.8.4.4 gateway=192.168.88.1
+/ip dns
+set allow-remote-requests=yes servers=8.8.8.8,8.8.4.4
+/ip firewall filter
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" \
+    disabled=yes
+/ip firewall nat
+add action=masquerade chain=srcnat out-interface=ether1-ISP
+add action=passthrough chain=unused-hs-chain comment="place hotspot rules here" \
+    disabled=yes
+add action=masquerade chain=srcnat comment="masquerade hotspot network" \
+    src-address=10.0.0.0/24
+/ip hotspot user
+add name=admin password=admin
+/ppp profile
+add comment="CHANGE NAME AND LIMIT ACCORDINGLY" local-address=10.10.0.1 name=5M \
+    parent-queue=ppp queue-type=default-small rate-limit=5M/5M remote-address=\
+    PPPOE
+add local-address=10.10.0.1 name=20M parent-queue=ppp queue-type=default-small \
+    rate-limit=20M/20M remote-address=PPPOE
+add comment="COPY/PASTE TO ADD MORE PROFILES" local-address=10.10.0.1 name=10M \
+    parent-queue=ppp queue-type=default-small rate-limit=10M/10M \
+    remote-address=PPPOE
+/ppp secret
+add comment="copy secrets to add more clients." name=client1-5M password=1234 \
+    profile=5M service=pppoe
+add comment="change names accordingly to clients" name=client2-10M password=\
+    1234 profile=10M service=pppoe
+add comment="check profiles of secrets according to speed plans" name=\
+    client3-20M password=1234 profile=20M service=pppoe
+add comment="password (1234)" name=admin password=1234 profile=20M service=\
+    pppoe
+/system clock
+set time-zone-name=Asia/Manila
+[admin@MikroTik] > 

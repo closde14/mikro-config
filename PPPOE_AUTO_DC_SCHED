@@ -1,0 +1,51 @@
+Description:
+THIS IS NOT A PAYMENT REMINDER FOR NON_PAYMENT clients
+automatically disconnect a ppp client or account after 30 days of initial log in
+automatically change profile with 1k/1k limit after scheduled expiration
+you can change date of expiration of clients in the system/scheduler
+
+
+
+
+
+CREATE  PPPOE PROFILES with normal plan and 1 plan with 1k/1k limit 
+
+ex:
+
+
+ppp/profile add name=5M rate-limit=5M/5M 
+ppp/profile add name=1k rate-limit=1k/1k
+
+
+5M IS ONE OF YOUR NORMAL PROFILES
+1K IS THE PROFILES FOR EXPIRED PPP USERS OR CLIENTS(SECRET)
+
+
+IN THE 5M  PROFILE/ SCRIPTS/ ON UP    PASTE THIS SCRIPT
+
+:local secretName "$user"
+/system scheduler add interval=30d name=$secretName on-event="/ppp secret set [find name=$secretName] profile=1k
+/ppp active remove [find name=$secretName]"
+ 
+ON DOWN
+
+queue/simple/remove [find name="$user"]
+
+
+
+IN THE 1K PROFILE SCRIPT PASTE THIS 
+
+ON UP 
+
+
+:local secretName "$user"
+/system scheduler remove [find name=$secretName]
+
+
+
+ON DOWN
+
+queue/simple/remove [find name="$user"]
+
+
+
